@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:15-alpine
+    network_mode: host
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dbname
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d dbname"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      network: host
+    network_mode: host
+    environment:
+      DATABASE_URL: postgres://user:password@127.0.0.1:5432/dbname?sslmode=disable
+      PORT: 8080
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      network: host
+    network_mode: host
+    # We'll change frontend port in its nginx.conf to 3000 to avoid conflict with proxy
+    depends_on:
+      - backend
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+      network: host
+    network_mode: host
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  postgres_data:
