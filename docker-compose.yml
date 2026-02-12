@@ -33,7 +33,7 @@ services:
       dockerfile: Dockerfile
       network: host
     network_mode: host
-    # We'll change frontend port in its nginx.conf to 3000 to avoid conflict with proxy
+    # We'll change frontend port in its nginx.conf to 3000 to avoid conflict with proxy 
     depends_on:
       - backend
 
