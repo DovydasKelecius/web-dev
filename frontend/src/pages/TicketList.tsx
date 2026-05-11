@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+interface Comment {
+  id: number;
+  created_at: string;
+  user: { username: string };
+  content: string;
+}
+
 interface Ticket {
   id: number;
   title: string;
@@ -9,6 +16,7 @@ interface Ticket {
   status: string;
   created_at: string;
   asset: { hostname: string; ip_address: string; asset_type: string };
+  comments: Comment[];
 }
 
 interface Asset {
@@ -29,6 +37,7 @@ const TicketList: React.FC = () => {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [formData, setFormData] = useState({ title: '', description: '', severity: 'Medium', status: 'Open', asset_id: 0 });
+  const [commentText, setCommentText] = useState('');
   const [errors, setErrors] = useState<any>({});
   
   const role = localStorage.getItem('role');
@@ -92,6 +101,25 @@ const TicketList: React.FC = () => {
     }
   };
 
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!commentText || !selectedTicket) return;
+    try {
+      const res = await axios.post('/api/comments/create', {
+        ticket_id: selectedTicket.id,
+        content: commentText,
+        user_id: 1 // In full app, get from auth context/token
+      });
+      setSelectedTicket({
+        ...selectedTicket,
+        comments: [...(selectedTicket.comments || []), res.data]
+      });
+      setCommentText('');
+    } catch (err) {
+      console.error("Comment failed", err);
+    }
+  };
+
   const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this incident record?')) return;
     await axios.delete(`/api/tickets/delete?id=${id}`);
@@ -105,23 +133,12 @@ const TicketList: React.FC = () => {
         <button className="btn btn-cyber" onClick={() => setShowCreate(true)}>REPORT INCIDENT</button>
       </div>
 
-      {/* Filters Row */}
       <div className="row mb-4 g-2">
         <div className="col-md-3">
-          <input 
-            type="text" 
-            className="form-control form-control-cyber" 
-            placeholder="Search by ID..." 
-            value={searchID}
-            onChange={(e) => { setSearchID(e.target.value); setPage(1); }}
-          />
+          <input type="text" className="form-control form-control-cyber" placeholder="Search by ID..." value={searchID} onChange={(e) => { setSearchID(e.target.value); setPage(1); }} />
         </div>
         <div className="col-md-3">
-          <select 
-            className="form-select form-control-cyber" 
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          >
+          <select className="form-select form-control-cyber" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>
             <option value="">All Statuses</option>
             <option value="Open">Open</option>
             <option value="In Progress">In Progress</option>
@@ -130,11 +147,7 @@ const TicketList: React.FC = () => {
           </select>
         </div>
         <div className="col-md-3">
-          <select 
-            className="form-select form-control-cyber" 
-            value={severityFilter}
-            onChange={(e) => { setSeverityFilter(e.target.value); setPage(1); }}
-          >
+          <select className="form-select form-control-cyber" value={severityFilter} onChange={(e) => { setSeverityFilter(e.target.value); setPage(1); }}>
             <option value="">All Severities</option>
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
@@ -170,17 +183,11 @@ const TicketList: React.FC = () => {
                   <td>{t.id}</td>
                   <td>{t.title}</td>
                   <td>{t.asset?.hostname}</td>
-                  <td>
-                    <span className={`badge ${t.severity === 'Critical' ? 'badge-critical' : 'bg-warning'}`}>
-                      {t.severity}
-                    </span>
-                  </td>
+                  <td><span className={`badge ${t.severity === 'Critical' ? 'badge-critical' : 'bg-warning'}`}>{t.severity}</span></td>
                   <td>{t.status}</td>
                   <td>
                     <button className="btn btn-sm btn-outline-info me-2" onClick={() => setSelectedTicket(t)}>View</button>
-                    {role === 'admin' && (
-                      <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(t.id)}>Purge</button>
-                    )}
+                    {role === 'admin' && <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(t.id)}>Purge</button>}
                   </td>
                 </tr>
               ))
@@ -188,41 +195,19 @@ const TicketList: React.FC = () => {
           </tbody>
         </table>
 
-        {/* Improved Paginator */}
         <div className="d-flex justify-content-between align-items-center mt-3">
           <nav>
             <ul className="pagination mb-0">
-              <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => setPage(1)}>« FIRST</button>
-              </li>
-              <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => setPage(p => p - 1)}>‹ PREV</button>
-              </li>
-              <li className="page-item disabled">
-                <span className="page-link text-white bg-dark border-secondary">
-                  PAGE {page} / {totalPages}
-                </span>
-              </li>
-              <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => setPage(p => p + 1)}>NEXT ›</button>
-              </li>
-              <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => setPage(totalPages)}>LAST »</button>
-              </li>
+              <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(1)}>« FIRST</button></li>
+              <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(p => p - 1)}>‹ PREV</button></li>
+              <li className="page-item disabled"><span className="page-link text-white bg-dark border-secondary">PAGE {page} / {totalPages}</span></li>
+              <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(p => p + 1)}>NEXT ›</button></li>
+              <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(totalPages)}>LAST »</button></li>
             </ul>
           </nav>
-
           <form className="d-flex align-items-center" onSubmit={handleJumpPage}>
             <span className="text-muted small me-2">JUMP TO:</span>
-            <input 
-              type="number" 
-              className="form-control form-control-cyber form-control-sm" 
-              style={{width: '80px'}} 
-              value={jumpPage}
-              onChange={(e) => setJumpPage(e.target.value)}
-              min="1"
-              max={totalPages}
-            />
+            <input type="number" className="form-control form-control-cyber form-control-sm" style={{width: '80px'}} value={jumpPage} onChange={(e) => setJumpPage(e.target.value)} min="1" max={totalPages} />
             <button type="submit" className="btn btn-sm btn-outline-primary ms-2">GO</button>
           </form>
         </div>
@@ -277,17 +262,17 @@ const TicketList: React.FC = () => {
         </div>
       )}
 
-      {/* View Modal with Status Edit for Admin */}
+      {/* View Modal with Comments */}
       {selectedTicket && (
         <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.8)'}}>
-          <div className="modal-dialog modal-lg">
+          <div className="modal-dialog modal-lg modal-dialog-scrollable">
             <div className="modal-content cyber-card cyber-border-glow">
               <div className="modal-header border-secondary">
                 <h5 className="modal-title cyber-title">Incident Details #{selectedTicket.id}</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setSelectedTicket(null)}></button>
               </div>
               <div className="modal-body">
-                <div className="row">
+                <div className="row mb-3">
                   <div className="col-md-6">
                     <p><strong>Title:</strong> {selectedTicket.title}</p>
                     <p><strong>Severity:</strong> <span className={`badge ${selectedTicket.severity === 'Critical' ? 'badge-critical' : 'bg-warning'}`}>{selectedTicket.severity}</span></p>
@@ -299,12 +284,35 @@ const TicketList: React.FC = () => {
                     <p><strong>Created:</strong> {new Date(selectedTicket.created_at).toLocaleString()}</p>
                   </div>
                 </div>
-                <hr className="border-secondary" />
                 <p><strong>Full Description:</strong></p>
-                <div className="p-3 bg-dark rounded border border-secondary mb-3">{selectedTicket.description}</div>
+                <div className="p-3 bg-dark rounded border border-secondary mb-4">{selectedTicket.description}</div>
                 
+                <h6 className="cyber-title mb-3">Discussion Feed</h6>
+                <div className="mb-4">
+                  {selectedTicket.comments?.length > 0 ? (
+                    selectedTicket.comments.map(c => (
+                      <div key={c.id} className="mb-2 p-2 border-start border-primary bg-dark rounded">
+                        <div className="d-flex justify-content-between small text-muted mb-1">
+                          <strong>{c.user?.username}</strong>
+                          <span>{new Date(c.created_at).toLocaleString()}</span>
+                        </div>
+                        <div>{c.content}</div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-muted small">No comments yet.</p>
+                  )}
+                </div>
+
+                <form onSubmit={handleAddComment} className="mb-4">
+                  <div className="input-group">
+                    <input type="text" className="form-control form-control-cyber" placeholder="Add detailed information..." value={commentText} onChange={e => setCommentText(e.target.value)} />
+                    <button className="btn btn-outline-primary" type="submit">POST</button>
+                  </div>
+                </form>
+
                 {role === 'admin' && (
-                  <div className="border border-info p-3 rounded">
+                  <div className="border border-info p-3 rounded mt-2">
                     <h6 className="text-info mb-2">ADMIN ACTION: UPDATE STATUS</h6>
                     <div className="btn-group w-100">
                       <button className="btn btn-outline-info" onClick={() => handleUpdateStatus(selectedTicket.id, 'In Progress')}>In Progress</button>

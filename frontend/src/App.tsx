@@ -11,7 +11,7 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Dashboard = () => {
-  const [stats, setStats] = useState({ tickets: 0, assets: 0 });
+  const [stats, setStats] = useState({ tickets: 0, assets: 0, open: 0, in_progress: 0, resolved: 0 });
 
   useEffect(() => {
     axios.get('/api/stats').then(res => setStats(res.data));
@@ -21,19 +21,41 @@ const Dashboard = () => {
     <div className="container mt-5">
       <div className="cyber-card cyber-border-glow text-center">
         <h2 className="cyber-title mb-4">Command Center</h2>
-        <div className="row">
+        
+        {/* Main Stats */}
+        <div className="row mb-4">
           <div className="col-md-6 mb-3">
             <div className="p-4 border border-secondary rounded">
-              <h5 className="text-uppercase text-info mb-3">Total Security Incidents</h5>
+              <h5 className="text-uppercase text-info mb-3">Total Incidents</h5>
               <h2 className="display-4 fw-bold text-white">{stats.tickets.toLocaleString()}</h2>
-              <p className="text-muted small">High-volume threat database active</p>
             </div>
           </div>
           <div className="col-md-6 mb-3">
             <div className="p-4 border border-secondary rounded">
-              <h5 className="text-uppercase text-info mb-3">Monitored Network Assets</h5>
+              <h5 className="text-uppercase text-info mb-3">Monitored Assets</h5>
               <h2 className="display-4 fw-bold text-white">{stats.assets.toLocaleString()}</h2>
-              <p className="text-muted small">Real-time infrastructure tracking</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Status Stats */}
+        <div className="row">
+          <div className="col-md-4 mb-3">
+            <div className="p-3 border border-warning rounded">
+              <h6 className="text-warning">OPEN</h6>
+              <h3 className="text-white">{stats.open.toLocaleString()}</h3>
+            </div>
+          </div>
+          <div className="col-md-4 mb-3">
+            <div className="p-3 border border-primary rounded">
+              <h6 className="text-primary">IN PROGRESS</h6>
+              <h3 className="text-white">{stats.in_progress.toLocaleString()}</h3>
+            </div>
+          </div>
+          <div className="col-md-4 mb-3">
+            <div className="p-3 border border-success rounded">
+              <h6 className="text-success">RESOLVED</h6>
+              <h3 className="text-white">{stats.resolved.toLocaleString()}</h3>
             </div>
           </div>
         </div>

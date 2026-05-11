@@ -46,7 +46,7 @@ func (h *TicketHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	offset := (page - 1) * pageSize
 
-	query.Limit(pageSize).Offset(offset).Preload("Asset").Find(&tickets)
+	query.Limit(pageSize).Offset(offset).Preload("Asset").Preload("Comments").Preload("Comments.User").Find(&tickets)
 
 	lastPage := (total / int64(pageSize))
 	if total%int64(pageSize) != 0 || total == 0 {

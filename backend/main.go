@@ -27,13 +27,29 @@ func main() {
 	// Routes
 	http.HandleFunc("/api/login", authH.Login)
 	http.HandleFunc("/api/stats", func(w http.ResponseWriter, r *http.Request) {
-		var tCount, aCount int64
+		var tCount, aCount, openC, progC, resC int64
 		db.Model(&models.Ticket{}).Count(&tCount)
 		db.Model(&models.Asset{}).Count(&aCount)
+		db.Model(&models.Ticket{}).Where("status = ?", "Open").Count(&openC)
+		db.Model(&models.Ticket{}).Where("status = ?", "In Progress").Count(&progC)
+		db.Model(&models.Ticket{}).Where("status = ?", "Resolved").Count(&resC)
+		
 		json.NewEncoder(w).Encode(map[string]int64{
-			"tickets": tCount,
-			"assets":  aCount,
+			"tickets":     tCount,
+			"assets":      aCount,
+			"open":        openC,
+			"in_progress": progC,
+			"resolved":    resC,
 		})
+	})
+
+	// Comment Route
+	http.HandleFunc("/api/comments/create", func(w http.ResponseWriter, r *http.Request) {
+		var comment models.Comment
+		json.NewDecoder(r.Body).Decode(&comment)
+		db.Create(&comment)
+		db.Preload("User").First(&comment, comment.ID)
+		json.NewEncoder(w).Encode(comment)
 	})
 
 	// Admin Routes (Should be middleware protected in full impl, but adding here)
