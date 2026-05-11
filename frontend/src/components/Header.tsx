@@ -12,9 +12,9 @@ const Header: React.FC = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark navbar-cyber">
+    <nav className="navbar navbar-expand-lg navbar-light navbar-custom">
       <div className="container">
-        <Link className="navbar-brand cyber-title" to="/">CyberGuard</Link>
+        <Link className="navbar-brand" to="/">CyberGuard</Link>
         <div className="collapse navbar-collapse">
           <ul className="navbar-nav me-auto">
             {token && (
@@ -36,11 +36,11 @@ const Header: React.FC = () => {
           <div className="d-flex align-items-center">
             {token ? (
               <>
-                <span className="text-info me-3">[{role}]</span>
+                <span className="text-primary fw-bold me-3">[{role?.toUpperCase() || 'USER'}]</span>
                 <button className="btn btn-outline-danger btn-sm" onClick={handleLogout}>Logout</button>
               </>
             ) : (
-              <Link className="btn btn-cyber btn-sm" to="/login">Login</Link>
+              <Link className="btn btn-custom btn-sm" to="/login">Login</Link>
             )}
           </div>
         </div>

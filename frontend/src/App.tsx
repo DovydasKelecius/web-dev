@@ -44,21 +44,21 @@ const Dashboard = () => {
           {/* Detailed Status Stats */}
           <div className="row">
             <div className="col-md-4 mb-3">
-              <div className="p-3 border border-warning rounded">
-                <h6 className="text-warning">OPEN</h6>
-                <h3>{stats.open.toLocaleString()}</h3>
+              <div className="p-3 border border-open rounded bg-light">
+                <h6 className="stat-open fw-bold">OPEN</h6>
+                <h3 className="fw-bold">{stats.open.toLocaleString()}</h3>
               </div>
             </div>
             <div className="col-md-4 mb-3">
-              <div className="p-3 border border-primary rounded">
-                <h6 className="text-primary">IN PROGRESS</h6>
-                <h3>{stats.in_progress.toLocaleString()}</h3>
+              <div className="p-3 border border-progress rounded bg-light">
+                <h6 className="stat-progress fw-bold">IN PROGRESS</h6>
+                <h3 className="fw-bold">{stats.in_progress.toLocaleString()}</h3>
               </div>
             </div>
             <div className="col-md-4 mb-3">
-              <div className="p-3 border border-success rounded">
-                <h6 className="text-success">RESOLVED</h6>
-                <h3>{stats.resolved.toLocaleString()}</h3>
+              <div className="p-3 border border-resolved rounded bg-light">
+                <h6 className="stat-resolved fw-bold">RESOLVED</h6>
+                <h3 className="fw-bold">{stats.resolved.toLocaleString()}</h3>
               </div>
             </div>
           </div>

@@ -323,21 +323,53 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
-/* 6. Form Styling */
-.form-control-custom {
-  background-color: #fff !important;
+.navbar-custom .nav-link {
   color: #666 !important;
-  border: 1px solid #ddd !important;
+  font-weight: 500;
+  transition: color 0.2s;
 }
 
-/* 7. Button Customization */
+.navbar-custom .nav-link:hover {
+  color: #007be9 !important;
+}
+
+.navbar-custom .navbar-brand {
+  color: #007be9 !important;
+  font-weight: bold;
+}
+
+/* 7. Button Customization (Requirement: 10+ property groups) */
 .btn-custom {
   background: #007be9;
-  border: none;
+  border: 1px solid #0069c6;
   color: white;
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 123, 233, 0.2);
 }
 
 .btn-custom:hover {
   background: #0069c6;
   color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 233, 0.3);
 }
+
+.btn-custom:active {
+  background: #0056b3;
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 123, 233, 0.2);
+}
+
+/* Dashboard Severity Colors */
+.stat-open { color: #f39c12; }
+.stat-progress { color: #007be9; }
+.stat-resolved { color: #00a65a; }
+
+.border-open { border-color: #f39c12 !important; }
+.border-progress { border-color: #007be9 !important; }
+.border-resolved { border-color: #00a65a !important; }
