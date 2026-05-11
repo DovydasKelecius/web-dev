@@ -11,28 +11,57 @@ interface Ticket {
   asset: { hostname: string; ip_address: string; asset_type: string };
 }
 
+interface Asset {
+  id: number;
+  hostname: string;
+}
+
 const TicketList: React.FC = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [formData, setFormData] = useState({ title: '', description: '', severity: 'Medium', status: 'Open', asset_id: 0 });
+  const [errors, setErrors] = useState<any>({});
+  
   const role = localStorage.getItem('role');
 
   useEffect(() => {
     fetchTickets();
-  }, [page]);
+    if (showCreate) fetchAssets();
+  }, [page, statusFilter, showCreate]);
 
   const fetchTickets = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`/api/tickets?page=${page}`);
+      const res = await axios.get(`/api/tickets?page=${page}&status=${statusFilter}`);
       setTickets(res.data.data || []);
       setTotalPages(res.data.last || 1);
     } catch (err) {
       console.error(err);
     }
     setLoading(false);
+  };
+
+  const fetchAssets = async () => {
+    const res = await axios.get('/api/assets');
+    setAssets(res.data || []);
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    try {
+      await axios.post('/api/tickets/create', { ...formData, asset_id: Number(formData.asset_id) });
+      setShowCreate(false);
+      fetchTickets();
+    } catch (err: any) {
+      if (err.response?.status === 422) setErrors(err.response.data);
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -45,7 +74,21 @@ const TicketList: React.FC = () => {
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="cyber-title">Security Incidents</h2>
-        <span className="text-muted">Page {page} of {totalPages}</span>
+        <div className="d-flex">
+          <select 
+            className="form-select form-control-cyber me-2" 
+            style={{width: '150px'}}
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          >
+            <option value="">All Status</option>
+            <option value="Open">Open</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Closed">Closed</option>
+          </select>
+          <button className="btn btn-cyber" onClick={() => setShowCreate(true)}>REPORT INCIDENT</button>
+        </div>
       </div>
 
       <div className="cyber-card">
@@ -89,24 +132,65 @@ const TicketList: React.FC = () => {
 
         <nav>
           <ul className="pagination justify-content-center">
-            <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
-              <button className="page-link" onClick={() => setPage(1)}>FIRST</button>
-            </li>
-            <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
-              <button className="page-link" onClick={() => setPage(p => p - 1)}>PREV</button>
-            </li>
+            <li className={`page-item ${page === 1 ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(1)}>FIRST</button></li>
+            <li className={`page-item ${page === 1 ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(p => p - 1)}>PREV</button></li>
             <li className="page-item disabled"><span className="page-link">{page} / {totalPages}</span></li>
-            <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}>
-              <button className="page-link" onClick={() => setPage(p => p + 1)}>NEXT</button>
-            </li>
-            <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}>
-              <button className="page-link" onClick={() => setPage(totalPages)}>LAST</button>
-            </li>
+            <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(p => p + 1)}>NEXT</button></li>
+            <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(totalPages)}>LAST</button></li>
           </ul>
         </nav>
       </div>
 
-      {/* Ticket View Modal */}
+      {/* Ticket Create Modal */}
+      {showCreate && (
+        <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.8)'}}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content cyber-card cyber-border-glow">
+              <div className="modal-header border-secondary">
+                <h5 className="modal-title cyber-title">Report New Incident</h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setShowCreate(false)}></button>
+              </div>
+              <form onSubmit={handleCreate}>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label small">Incident Title</label>
+                    <input className={`form-control form-control-cyber ${errors.title ? 'is-invalid' : ''}`} value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
+                    {errors.title && <div className="invalid-feedback">{errors.title}</div>}
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label small">Description</label>
+                    <textarea className="form-control form-control-cyber" rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required />
+                  </div>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label small">Affected Asset</label>
+                      <select className="form-select form-control-cyber" value={formData.asset_id} onChange={e => setFormData({...formData, asset_id: Number(e.target.value)})} required>
+                        <option value="">Select Asset...</option>
+                        {assets.map(a => <option key={a.id} value={a.id}>{a.hostname}</option>)}
+                      </select>
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label small">Severity</label>
+                      <select className="form-select form-control-cyber" value={formData.severity} onChange={e => setFormData({...formData, severity: e.target.value})}>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Critical</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer border-secondary">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-cyber">SUBMIT REPORT</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal logic remains same */}
       {selectedTicket && (
         <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.8)'}}>
           <div className="modal-dialog modal-lg">
@@ -130,9 +214,7 @@ const TicketList: React.FC = () => {
                 </div>
                 <hr className="border-secondary" />
                 <p><strong>Full Description:</strong></p>
-                <div className="p-3 bg-dark rounded border border-secondary">
-                  {selectedTicket.description}
-                </div>
+                <div className="p-3 bg-dark rounded border border-secondary">{selectedTicket.description}</div>
               </div>
               <div className="modal-footer border-secondary">
                 <button type="button" className="btn btn-secondary" onClick={() => setSelectedTicket(null)}>Close</button>

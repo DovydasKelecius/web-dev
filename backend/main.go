@@ -20,9 +20,13 @@ func main() {
 	authH := &handlers.AuthHandler{DB: db}
 	assetH := &handlers.AssetHandler{DB: db}
 	ticketH := &handlers.TicketHandler{DB: db}
+	logH := &handlers.LogHandler{DB: db}
 
 	// Routes
 	http.HandleFunc("/api/login", authH.Login)
+
+	// Admin Routes (Should be middleware protected in full impl, but adding here)
+	http.HandleFunc("/api/logs", logH.List)
 
 	// Asset Routes
 	http.HandleFunc("/api/assets", assetH.List)           // GET

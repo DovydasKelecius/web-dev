@@ -19,6 +19,7 @@ type TicketHandler struct {
 // Requirement: Pagination (>25 items)
 func (h *TicketHandler) List(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	status := r.URL.Query().Get("status")
 	if page < 1 {
 		page = 1
 	}
@@ -26,11 +27,17 @@ func (h *TicketHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	var tickets []models.Ticket
 	var total int64
-	h.DB.Model(&models.Ticket{}).Count(&total)
+	query := h.DB.Model(&models.Ticket{})
+
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	query.Count(&total)
 
 	offset := (page - 1) * pageSize
 
-	h.DB.Limit(pageSize).Offset(offset).Preload("Asset").Find(&tickets)
+	query.Limit(pageSize).Offset(offset).Preload("Asset").Find(&tickets)
 
 	response := map[string]interface{}{
 		"data":  tickets,

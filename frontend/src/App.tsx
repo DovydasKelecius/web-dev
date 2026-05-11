@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import Login from './pages/Login';
 import TicketList from './pages/TicketList';
 import AssetList from './pages/AssetList';
+import LogList from './pages/LogList';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -58,6 +59,11 @@ function App() {
             <Route path="/assets" element={
               <ProtectedRoute>
                 <AssetList />
+              </ProtectedRoute>
+            } />
+            <Route path="/logs" element={
+              <ProtectedRoute>
+                <LogList />
               </ProtectedRoute>
             } />
           </Routes>
