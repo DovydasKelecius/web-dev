@@ -34,6 +34,7 @@ type Ticket struct {
 	Asset       Asset          `gorm:"foreignKey:AssetID" json:"asset"`
 	ReporterID  uint           `json:"reporter_id"`
 	Comments    []Comment      `gorm:"foreignKey:TicketID" json:"comments"`
+	History     []History      `gorm:"foreignKey:TicketID" json:"history"`
 }
 
 type Comment struct {
@@ -43,6 +44,15 @@ type Comment struct {
 	UserID    uint      `json:"user_id"`
 	User      User      `gorm:"foreignKey:UserID" json:"user"`
 	Content   string    `gorm:"type:text;not null" json:"content"`
+}
+
+type History struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	TicketID  uint      `json:"ticket_id"`
+	Action    string    `json:"action"` // e.g., "Status Changed to Resolved", "Comment Added"
+	UserID    uint      `json:"user_id"`
+	User      User      `gorm:"foreignKey:UserID" json:"user"`
 }
 
 // Requirement: User Management
