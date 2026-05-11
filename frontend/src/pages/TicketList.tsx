@@ -138,11 +138,11 @@ const TicketList: React.FC = () => {
 
   const getSeverityBadge = (sev: string) => {
     switch (sev) {
-      case 'Critical': return 'badge-critical';
-      case 'High': return 'badge-high';
-      case 'Medium': return 'badge-medium';
-      case 'Low': return 'badge-low';
-      default: return 'bg-secondary';
+      case 'Critical': return 'badge bg-danger';
+      case 'High': return 'badge bg-warning text-dark';
+      case 'Medium': return 'badge bg-info text-dark';
+      case 'Low': return 'badge bg-secondary';
+      default: return 'badge bg-secondary';
     }
   };
 
@@ -163,12 +163,12 @@ const TicketList: React.FC = () => {
             </div>
             <div className="col-md-3">
               <select className="form-select form-control-custom" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>
-                <option value="">All Statuses</option>
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Closed">Closed</option>
+              <option value="">All Statuses</option>
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
               </select>
+
             </div>
             <div className="col-md-3">
               <select className="form-select form-control-custom" value={severityFilter} onChange={(e) => { setSeverityFilter(e.target.value); setPage(1); }}>
@@ -335,7 +335,6 @@ const TicketList: React.FC = () => {
                               <div className="btn-group w-100">
                                 <button className="btn btn-sm btn-outline-info" onClick={() => handleUpdate(selectedTicket.id, { status: 'In Progress' })}>In Progress</button>
                                 <button className="btn btn-sm btn-outline-success" onClick={() => handleUpdate(selectedTicket.id, { status: 'Resolved' })}>Resolve</button>
-                                <button className="btn btn-sm btn-outline-secondary" onClick={() => handleUpdate(selectedTicket.id, { status: 'Closed' })}>Close</button>
                               </div>
                            </div>
                            <div className="col-md-6">

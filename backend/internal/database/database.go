@@ -46,11 +46,18 @@ func Seed(db *gorm.DB) {
 	// 1. Create Users
 	adminPass, _ := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
 	userPass, _ := bcrypt.GenerateFromPassword([]byte("user123"), bcrypt.DefaultCost)
+	devPass, _ := bcrypt.GenerateFromPassword([]byte("dev123"), bcrypt.DefaultCost)
+	auditPass, _ := bcrypt.GenerateFromPassword([]byte("audit123"), bcrypt.DefaultCost)
 
-	admin := models.User{Username: "admin", PasswordHash: string(adminPass), Role: "admin"}
-	standardUser := models.User{Username: "user", PasswordHash: string(userPass), Role: "user"}
-	db.Create(&admin)
-	db.Create(&standardUser)
+	users := []models.User{
+		{Username: "admin", PasswordHash: string(adminPass), Role: "admin"},
+		{Username: "user1", PasswordHash: string(userPass), Role: "user"},
+		{Username: "user2", PasswordHash: string(userPass), Role: "user"},
+		{Username: "dev", PasswordHash: string(devPass), Role: "user"},
+		{Username: "audit", PasswordHash: string(auditPass), Role: "admin"},
+	}
+	db.Create(&users)
+	standardUser := users[1]
 
 	// 2. Create 100 Assets
 	assetTypes := []string{"Server", "Workstation", "Network Device", "Database", "Firewall"}
@@ -91,7 +98,7 @@ func Seed(db *gorm.DB) {
 		"Integrity check failed for system binary.",
 	}
 	severities := []string{"Low", "Medium", "High", "Critical"}
-	statuses := []string{"Open", "In Progress", "Resolved", "Closed"}
+	statuses := []string{"Open", "In Progress", "Resolved"}
 
 	for i := 0; i < 10; i++ {
 		tickets := make([]models.Ticket, 1000)
