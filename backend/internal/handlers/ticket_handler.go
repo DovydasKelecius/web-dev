@@ -112,12 +112,12 @@ func (h *TicketHandler) Update(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Record History if severity changed
-	if sev, ok := input["severity"].(string); ok {
+	// Record History if assigned
+	if solverID, ok := input["solver_id"].(float64); ok {
 		h.DB.Create(&models.History{
 			TicketID: ticket.ID,
-			Action:   fmt.Sprintf("Severity changed to %s", sev),
-			UserID:   1,
+			Action:   fmt.Sprintf("Assigned to Agent %v", solverID),
+			UserID:   1, // Should get from context
 		})
 	}
 
