@@ -87,7 +87,7 @@ function App() {
                 <TicketList />
               </ProtectedRoute>
             } />
-            <Route path="/assets" element={
+            <Route path="/network-assets" element={
               <ProtectedRoute>
                 <AssetList />
               </ProtectedRoute>

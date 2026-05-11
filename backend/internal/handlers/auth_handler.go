@@ -21,8 +21,9 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
-	Role  string `json:"role"`
+	Token  string `json:"token"`
+	Role   string `json:"role"`
+	UserID uint   `json:"user_id"`
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +55,8 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	logger.Log(h.DB, "INFO", "AuthHandler.Login", fmt.Sprintf("User logged in: %s", user.Username), user.ID)
 
 	json.NewEncoder(w).Encode(LoginResponse{
-		Token: token,
-		Role:  user.Role,
+		Token:  token,
+		Role:   user.Role,
+		UserID: user.ID,
 	})
 }

@@ -12,6 +12,7 @@ interface Asset {
 
 const AssetList: React.FC = () => {
   const [assets, setAssets] = useState<Asset[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
   const [formData, setFormData] = useState({
@@ -20,10 +21,10 @@ const AssetList: React.FC = () => {
   const [errors, setErrors] = useState<any>({});
   const role = localStorage.getItem('role');
 
-  useEffect(() => { fetchAssets(); }, []);
+  useEffect(() => { fetchAssets(); }, [searchTerm]);
 
   const fetchAssets = async () => {
-    const res = await axios.get('/api/assets');
+    const res = await axios.get(`/api/assets?hostname=${searchTerm}`);
     setAssets(res.data || []);
   };
 
@@ -69,11 +70,21 @@ const AssetList: React.FC = () => {
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="cyber-title">Network Assets</h2>
-        {role === 'admin' && (
-          <button className="btn btn-cyber" onClick={handleOpenCreate}>
-            REGISTER NEW ASSET
-          </button>
-        )}
+        <div className="d-flex">
+          <input 
+            type="text" 
+            className="form-control form-control-cyber me-2" 
+            placeholder="Search hostname..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{width: '250px'}}
+          />
+          {role === 'admin' && (
+            <button className="btn btn-cyber" onClick={handleOpenCreate}>
+              REGISTER NEW ASSET
+            </button>
+          )}
+        </div>
       </div>
 
       {showForm && (

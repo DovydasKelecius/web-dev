@@ -23,7 +23,7 @@ const Header: React.FC = () => {
                   <Link className="nav-link" to="/tickets">Tickets</Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/assets">Assets</Link>
+                  <Link className="nav-link" to="/network-assets">Assets</Link>
                 </li>
                 {role === 'admin' && (
                   <li className="nav-item">

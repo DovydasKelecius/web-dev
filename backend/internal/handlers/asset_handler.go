@@ -16,8 +16,13 @@ type AssetHandler struct {
 }
 
 func (h *AssetHandler) List(w http.ResponseWriter, r *http.Request) {
+	hostname := r.URL.Query().Get("hostname")
 	var assets []models.Asset
-	h.DB.Find(&assets)
+	query := h.DB
+	if hostname != "" {
+		query = query.Where("hostname ILIKE ?", "%"+hostname+"%")
+	}
+	query.Find(&assets)
 	json.NewEncoder(w).Encode(assets)
 }
 

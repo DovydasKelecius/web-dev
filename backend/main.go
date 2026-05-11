@@ -48,6 +48,19 @@ func main() {
 		var comment models.Comment
 		json.NewDecoder(r.Body).Decode(&comment)
 		db.Create(&comment)
+		
+		// Log History
+		db.Create(&models.History{
+			TicketID: comment.TicketID,
+			Action:   "Comment Added",
+			UserID:   comment.UserID,
+		})
+
+		// Requirement: Detailed Log for audit
+		var user models.User
+		db.First(&user, comment.UserID)
+		logger.Log(db, "INFO", "CommentHandler", fmt.Sprintf("User %s added comment to Ticket #%d", user.Username, comment.TicketID), comment.UserID)
+
 		db.Preload("User").First(&comment, comment.ID)
 		json.NewEncoder(w).Encode(comment)
 	})

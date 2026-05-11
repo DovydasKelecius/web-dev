@@ -95,6 +95,32 @@ func (h *TicketHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Record History if status changed
+	if status, ok := input["status"].(string); ok {
+		h.DB.Create(&models.History{
+			TicketID: ticket.ID,
+			Action:   fmt.Sprintf("Status changed to %s", status),
+			UserID:   1,
+		})
+		// Requirement: When in progress, show as comment
+		if status == "In Progress" {
+			h.DB.Create(&models.Comment{
+				TicketID: ticket.ID,
+				UserID:   1, // System
+				Content:  "System: Investigation started. Ticket moved to In Progress.",
+			})
+		}
+	}
+
+	// Record History if severity changed
+	if sev, ok := input["severity"].(string); ok {
+		h.DB.Create(&models.History{
+			TicketID: ticket.ID,
+			Action:   fmt.Sprintf("Severity changed to %s", sev),
+			UserID:   1,
+		})
+	}
+
 	logger.Log(h.DB, "INFO", "TicketHandler.Update", fmt.Sprintf("Ticket updated: ID %s", id), 0)
 	h.DB.Preload("Asset").First(&ticket, id)
 	json.NewEncoder(w).Encode(ticket)
