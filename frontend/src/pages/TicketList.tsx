@@ -139,131 +139,124 @@ const TicketList: React.FC = () => {
   const getSeverityBadge = (sev: string) => {
     switch (sev) {
       case 'Critical': return 'badge-critical';
-      case 'High': return 'bg-danger';
-      case 'Medium': return 'bg-warning text-dark';
-      case 'Low': return 'bg-info text-dark';
+      case 'High': return 'badge-high';
+      case 'Medium': return 'badge-medium';
+      case 'Low': return 'badge-low';
       default: return 'bg-secondary';
     }
   };
 
   return (
-    <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2 className="cyber-title">Security Incidents</h2>
-        <button className="btn btn-cyber" onClick={() => setShowCreate(true)}>REPORT INCIDENT</button>
-      </div>
+    <div className="container support-content">
+      <div className="grid">
+        <div className="grid-header">
+          <i className="fa bi-ticket-detailed"></i>
+          <span>Security Incidents</span>
+          <div className="grid-tools">
+            <button className="btn btn-custom btn-sm" onClick={() => setShowCreate(true)}>REPORT INCIDENT</button>
+          </div>
+        </div>
+        <div className="grid-body">
+          <div className="row mb-4 g-2">
+            <div className="col-md-3">
+              <input type="text" className="form-control form-control-custom" placeholder="Search by ID..." value={searchID} onChange={(e) => { setSearchID(e.target.value); setPage(1); }} />
+            </div>
+            <div className="col-md-3">
+              <select className="form-select form-control-custom" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>
+                <option value="">All Statuses</option>
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+            <div className="col-md-3">
+              <select className="form-select form-control-custom" value={severityFilter} onChange={(e) => { setSeverityFilter(e.target.value); setPage(1); }}>
+                <option value="">All Severities</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Critical">Critical</option>
+              </select>
+            </div>
+          </div>
 
-      <div className="row mb-4 g-2">
-        <div className="col-md-3">
-          <input type="text" className="form-control form-control-cyber" placeholder="Search by ID..." value={searchID} onChange={(e) => { setSearchID(e.target.value); setPage(1); }} />
-        </div>
-        <div className="col-md-3">
-          <select className="form-select form-control-cyber" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>
-            <option value="">All Statuses</option>
-            <option value="Open">Open</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Resolved">Resolved</option>
-            <option value="Closed">Closed</option>
-          </select>
-        </div>
-        <div className="col-md-3">
-          <select className="form-select form-control-cyber" value={severityFilter} onChange={(e) => { setSeverityFilter(e.target.value); setPage(1); }}>
-            <option value="">All Severities</option>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-            <option value="Critical">Critical</option>
-          </select>
-        </div>
-        <div className="col-md-3 d-flex align-items-center justify-content-end">
-           <span className="text-muted small">Showing {tickets.length} records</span>
-        </div>
-      </div>
-
-      <div className="cyber-card">
-        <table className="table table-dark table-cyber">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Incident Title</th>
-              <th>Asset</th>
-              <th>Severity</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+          <div className="ticket-list-group">
             {loading ? (
-              <tr><td colSpan={6} className="text-center">Loading Feed...</td></tr>
+              <div className="text-center p-5">Loading Feed...</div>
             ) : tickets.length === 0 ? (
-              <tr><td colSpan={6} className="text-center">No records found.</td></tr>
+              <div className="text-center p-5">No records found.</div>
             ) : (
-              tickets.map(t => (
-                <tr key={t.id}>
-                  <td>{t.id}</td>
-                  <td>{t.title}</td>
-                  <td>{t.asset?.hostname}</td>
-                  <td><span className={`badge ${getSeverityBadge(t.severity)}`}>{t.severity}</span></td>
-                  <td>{t.status}</td>
-                  <td>
-                    <button className="btn btn-sm btn-outline-info me-2" onClick={() => setSelectedTicket(t)}>View</button>
-                    {role === 'admin' && <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(t.id)}>Purge</button>}
-                  </td>
-                </tr>
-              ))
+              <ul className="list-group fa-padding">
+                {tickets.map(t => (
+                  <li key={t.id} className="list-group-item" onClick={() => setSelectedTicket(t)}>
+                    <div className="media d-flex">
+                      <i className={`bi ${t.status === 'Closed' ? 'bi-check-circle-fill text-success' : 'bi-exclamation-octagon-fill'} me-3`} style={{fontSize: '1.5em'}}></i>
+                      <div className="media-body flex-grow-1">
+                        <strong>{t.title}</strong>
+                        <span className={`badge ms-2 ${getSeverityBadge(t.severity)}`}>{t.severity.toUpperCase()}</span>
+                        <span className="number pull-right float-end">#{t.id}</span>
+                        <p className="info">
+                          Asset: <strong>{t.asset?.hostname || 'N/A'}</strong> | Status: {t.status} | Created: {new Date(t.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      {role === 'admin' && (
+                        <button className="btn btn-sm btn-outline-danger ms-3 align-self-center" onClick={(e) => { e.stopPropagation(); handleDelete(t.id); }}>
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
             )}
-          </tbody>
-        </table>
 
-        <div className="d-flex justify-content-between align-items-center mt-3">
-          <nav>
-            <ul className="pagination mb-0">
-              <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(1)} disabled={page <= 1}>« FIRST</button></li>
-              <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(p => p - 1)} disabled={page <= 1}>‹ PREV</button></li>
-              <li className="page-item disabled"><span className="page-link text-white bg-dark border-secondary">PAGE {page} / {totalPages}</span></li>
-              <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(p => p + 1)} disabled={page >= totalPages}>NEXT ›</button></li>
-              <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(totalPages)} disabled={page >= totalPages}>LAST »</button></li>
-            </ul>
-          </nav>
-          <form className="d-flex align-items-center" onSubmit={handleJumpPage}>
-            <span className="text-muted small me-2">JUMP TO:</span>
-            <input type="number" className="form-control form-control-cyber form-control-sm" style={{width: '80px'}} value={jumpPage} onChange={(e) => setJumpPage(e.target.value)} min="1" max={totalPages} />
-            <button type="submit" className="btn btn-sm btn-outline-primary ms-2">GO</button>
-          </form>
+            <div className="d-flex justify-content-between align-items-center mt-3">
+              <nav>
+                <ul className="pagination mb-0">
+                  <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(1)} disabled={page <= 1}>« FIRST</button></li>
+                  <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(p => p - 1)} disabled={page <= 1}>‹ PREV</button></li>
+                  <li className="page-item disabled"><span className="page-link text-dark bg-white">PAGE {page} / {totalPages}</span></li>
+                  <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(p => p + 1)} disabled={page >= totalPages}>NEXT ›</button></li>
+                  <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(totalPages)} disabled={page >= totalPages}>LAST »</button></li>
+                </ul>
+              </nav>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Ticket Create Modal */}
       {showCreate && (
-        <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.8)'}}>
+        <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
           <div className="modal-dialog modal-lg">
-            <div className="modal-content cyber-card cyber-border-glow">
-              <div className="modal-header border-secondary">
-                <h5 className="modal-title cyber-title">Report New Incident</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowCreate(false)}></button>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Report New Incident</h5>
+                <button type="button" className="btn-close" onClick={() => setShowCreate(false)}></button>
               </div>
               <form onSubmit={handleCreate}>
                 <div className="modal-body">
                   <div className="mb-3">
                     <label className="form-label small">Incident Title</label>
-                    <input className={`form-control form-control-cyber ${errors.title ? 'is-invalid' : ''}`} value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
+                    <input className={`form-control ${errors.title ? 'is-invalid' : ''}`} value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
                     {errors.title && <div className="invalid-feedback">{errors.title}</div>}
                   </div>
                   <div className="mb-3">
                     <label className="form-label small">Description</label>
-                    <textarea className="form-control form-control-cyber" rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required />
+                    <textarea className="form-control" rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required />
                   </div>
                   <div className="row">
                     <div className="col-md-6 mb-3">
                       <label className="form-label small">Affected Asset</label>
-                      <select className="form-select form-control-cyber" value={formData.asset_id} onChange={e => setFormData({...formData, asset_id: Number(e.target.value)})} required>
+                      <select className="form-select" value={formData.asset_id} onChange={e => setFormData({...formData, asset_id: Number(e.target.value)})} required>
                         <option value="">Select Asset...</option>
                         {assets.map(a => <option key={a.id} value={a.id}>{a.hostname}</option>)}
                       </select>
                     </div>
                     <div className="col-md-6 mb-3">
                       <label className="form-label small">Severity</label>
-                      <select className="form-select form-control-cyber" value={formData.severity} onChange={e => setFormData({...formData, severity: e.target.value})}>
+                      <select className="form-select" value={formData.severity} onChange={e => setFormData({...formData, severity: e.target.value})}>
                         <option value="Low">Low</option>
                         <option value="Medium">Medium</option>
                         <option value="High">High</option>
@@ -272,9 +265,9 @@ const TicketList: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="modal-footer border-secondary">
+                <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-cyber">SUBMIT REPORT</button>
+                  <button type="submit" className="btn btn-custom">SUBMIT REPORT</button>
                 </div>
               </form>
             </div>
@@ -282,18 +275,18 @@ const TicketList: React.FC = () => {
         </div>
       )}
 
-      {/* View Modal with Comments and History */}
+      {/* View Modal */}
       {selectedTicket && (
-        <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.8)'}}>
+        <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
           <div className="modal-dialog modal-xl modal-dialog-scrollable">
-            <div className="modal-content cyber-card cyber-border-glow">
-              <div className="modal-header border-secondary">
-                <h5 className="modal-title cyber-title">Incident Details #{selectedTicket.id}</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setSelectedTicket(null)}></button>
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Incident Details #{selectedTicket.id}</h5>
+                <button type="button" className="btn-close" onClick={() => setSelectedTicket(null)}></button>
               </div>
               <div className="modal-body">
                 <div className="row">
-                  <div className="col-lg-8 border-end border-secondary">
+                  <div className="col-lg-8 border-end">
                     <div className="row mb-3">
                       <div className="col-md-6">
                         <p><strong>Title:</strong> {selectedTicket.title}</p>
@@ -307,13 +300,13 @@ const TicketList: React.FC = () => {
                       </div>
                     </div>
                     <p><strong>Full Description:</strong></p>
-                    <div className="p-3 bg-dark rounded border border-secondary mb-4">{selectedTicket.description}</div>
+                    <div className="p-3 bg-light rounded border mb-4">{selectedTicket.description}</div>
                     
-                    <h6 className="cyber-title mb-3">Discussion Feed</h6>
+                    <h6>Discussion Feed</h6>
                     <div className="mb-4" style={{maxHeight: '300px', overflowY: 'auto'}}>
                       {selectedTicket.comments?.length > 0 ? (
                         selectedTicket.comments.map(c => (
-                          <div key={c.id} className="mb-2 p-2 border-start border-primary bg-dark rounded">
+                          <div key={c.id} className="mb-2 p-2 border-start border-primary bg-light rounded">
                             <div className="d-flex justify-content-between small text-muted mb-1">
                               <strong>{c.user?.username || 'user'}</strong>
                               <span>{new Date(c.created_at).toLocaleString()}</span>
@@ -328,13 +321,13 @@ const TicketList: React.FC = () => {
 
                     <form onSubmit={handleAddComment} className="mb-4">
                       <div className="input-group">
-                        <input type="text" className="form-control form-control-cyber" placeholder="Add detailed information..." value={commentText} onChange={e => setCommentText(e.target.value)} />
+                        <input type="text" className="form-control" placeholder="Add detailed information..." value={commentText} onChange={e => setCommentText(e.target.value)} />
                         <button className="btn btn-outline-primary" type="submit">POST</button>
                       </div>
                     </form>
 
                     {role === 'admin' && (
-                      <div className="border border-info p-3 rounded mt-2 bg-dark">
+                      <div className="border border-info p-3 rounded mt-2 bg-light">
                         <h6 className="text-info mb-3">ADMIN OVERRIDE CONTROLS</h6>
                         <div className="row g-2 mb-3">
                            <div className="col-md-6">
@@ -360,11 +353,11 @@ const TicketList: React.FC = () => {
                   </div>
                   
                   <div className="col-lg-4">
-                    <h6 className="cyber-title mb-3 text-center">Audit Trail</h6>
+                    <h6 className="mb-3 text-center">Audit Trail</h6>
                     <div className="small" style={{maxHeight: '600px', overflowY: 'auto'}}>
                       {selectedTicket.history?.length > 0 ? (
                         selectedTicket.history.slice().reverse().map(h => (
-                          <div key={h.id} className="mb-2 p-2 border border-secondary rounded bg-dark" style={{fontSize: '0.8rem'}}>
+                          <div key={h.id} className="mb-2 p-2 border rounded bg-light" style={{fontSize: '0.8rem'}}>
                             <div className="text-info mb-1">{h.action}</div>
                             <div className="text-muted d-flex justify-content-between">
                               <span>By: {h.user?.username || 'SYSTEM'}</span>
@@ -379,7 +372,7 @@ const TicketList: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="modal-footer border-secondary">
+              <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setSelectedTicket(null)}>Close</button>
               </div>
             </div>

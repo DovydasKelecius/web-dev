@@ -67,35 +67,76 @@ const AssetList: React.FC = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="cyber-title">Network Assets</h2>
-        <div className="d-flex">
-          <input 
-            type="text" 
-            className="form-control form-control-cyber me-2" 
-            placeholder="Search hostname..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{width: '250px'}}
-          />
-          {role === 'admin' && (
-            <button className="btn btn-cyber" onClick={handleOpenCreate}>
-              REGISTER NEW ASSET
-            </button>
-          )}
+    <div className="container mt-4 support-content">
+      <div className="grid">
+        <div className="grid-header">
+          <i className="fa bi-pc-display"></i>
+          <span>Network Assets</span>
+          <div className="grid-tools">
+            {role === 'admin' && (
+              <button className="btn btn-custom btn-sm" onClick={handleOpenCreate}>
+                REGISTER NEW ASSET
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="grid-body">
+          <div className="d-flex mb-4">
+            <input 
+              type="text" 
+              className="form-control form-control-custom me-2" 
+              placeholder="Search hostname..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{width: '250px'}}
+            />
+          </div>
+
+          <table className="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Hostname</th>
+                <th>IP Address</th>
+                <th>Type</th>
+                <th>Criticality</th>
+                <th>Owner</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {assets.map(a => (
+                <tr key={a.id}>
+                  <td>{a.id}</td>
+                  <td>{a.hostname}</td>
+                  <td>{a.ip_address}</td>
+                  <td>{a.asset_type}</td>
+                  <td>{a.criticality}</td>
+                  <td>{a.owner}</td>
+                  <td>
+                    {role === 'admin' && (
+                      <>
+                        <button className="btn btn-sm btn-outline-warning me-2" onClick={() => handleOpenEdit(a)}>Edit</button>
+                        <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(a.id)}>Delete</button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
       {showForm && (
-        <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.8)'}}>
+        <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
           <div className="modal-dialog modal-lg">
-            <div className="modal-content cyber-card cyber-border-glow">
-              <div className="modal-header border-secondary">
-                <h5 className="modal-title cyber-title">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
                   {editingAsset ? `Edit Asset #${editingAsset.id}` : 'Register New Asset'}
                 </h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowForm(false)}></button>
+                <button type="button" className="btn-close" onClick={() => setShowForm(false)}></button>
               </div>
               <form onSubmit={handleSubmit}>
                 <div className="modal-body">
@@ -103,7 +144,7 @@ const AssetList: React.FC = () => {
                     <div className="col-md-6 mb-3">
                       <label className="form-label small">Hostname</label>
                       <input 
-                        className={`form-control form-control-cyber ${errors.hostname ? 'is-invalid' : ''}`}
+                        className={`form-control ${errors.hostname ? 'is-invalid' : ''}`}
                         value={formData.hostname} 
                         onChange={e => setFormData({...formData, hostname: e.target.value})}
                       />
@@ -112,7 +153,7 @@ const AssetList: React.FC = () => {
                     <div className="col-md-6 mb-3">
                       <label className="form-label small">IP Address</label>
                       <input 
-                        className={`form-control form-control-cyber ${errors.ip_address ? 'is-invalid' : ''}`}
+                        className={`form-control ${errors.ip_address ? 'is-invalid' : ''}`}
                         value={formData.ip_address} 
                         onChange={e => setFormData({...formData, ip_address: e.target.value})}
                       />
@@ -121,7 +162,7 @@ const AssetList: React.FC = () => {
                     <div className="col-md-4 mb-3">
                       <label className="form-label small">Type</label>
                       <select 
-                        className={`form-select form-control-cyber ${errors.asset_type ? 'is-invalid' : ''}`}
+                        className={`form-select ${errors.asset_type ? 'is-invalid' : ''}`}
                         value={formData.asset_type}
                         onChange={e => setFormData({...formData, asset_type: e.target.value})}
                       >
@@ -136,7 +177,7 @@ const AssetList: React.FC = () => {
                     <div className="col-md-4 mb-3">
                       <label className="form-label small">Criticality</label>
                       <select 
-                        className="form-select form-control-cyber"
+                        className="form-select"
                         value={formData.criticality}
                         onChange={e => setFormData({...formData, criticality: e.target.value})}
                       >
@@ -149,16 +190,16 @@ const AssetList: React.FC = () => {
                     <div className="col-md-4 mb-3">
                       <label className="form-label small">Owner</label>
                       <input 
-                        className="form-control form-control-cyber"
+                        className="form-control"
                         value={formData.owner} 
                         onChange={e => setFormData({...formData, owner: e.target.value})}
                       />
                     </div>
                   </div>
                 </div>
-                <div className="modal-footer border-secondary">
+                <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-cyber">
+                  <button type="submit" className="btn btn-custom">
                     {editingAsset ? 'UPDATE RECORD' : 'SAVE RECORD'}
                   </button>
                 </div>
@@ -167,42 +208,6 @@ const AssetList: React.FC = () => {
           </div>
         </div>
       )}
-
-      <div className="cyber-card">
-        <table className="table table-dark table-cyber">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Hostname</th>
-              <th>IP Address</th>
-              <th>Type</th>
-              <th>Criticality</th>
-              <th>Owner</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {assets.map(a => (
-              <tr key={a.id}>
-                <td>{a.id}</td>
-                <td>{a.hostname}</td>
-                <td>{a.ip_address}</td>
-                <td>{a.asset_type}</td>
-                <td>{a.criticality}</td>
-                <td>{a.owner}</td>
-                <td>
-                  {role === 'admin' && (
-                    <>
-                      <button className="btn btn-sm btn-outline-warning me-2" onClick={() => handleOpenEdit(a)}>Edit</button>
-                      <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(a.id)}>Delete</button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 };

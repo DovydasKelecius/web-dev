@@ -19,43 +19,47 @@ const Dashboard = () => {
 
   return (
     <div className="container mt-5">
-      <div className="cyber-card cyber-border-glow text-center">
-        <h2 className="cyber-title mb-4">Command Center</h2>
-        
-        {/* Main Stats */}
-        <div className="row mb-4">
-          <div className="col-md-6 mb-3">
-            <div className="p-4 border border-secondary rounded">
-              <h5 className="text-uppercase text-info mb-3">Total Incidents</h5>
-              <h2 className="display-4 fw-bold text-white">{stats.tickets.toLocaleString()}</h2>
-            </div>
-          </div>
-          <div className="col-md-6 mb-3">
-            <div className="p-4 border border-secondary rounded">
-              <h5 className="text-uppercase text-info mb-3">Monitored Assets</h5>
-              <h2 className="display-4 fw-bold text-white">{stats.assets.toLocaleString()}</h2>
-            </div>
-          </div>
+      <div className="grid">
+        <div className="grid-header">
+           <i className="bi bi-speedometer2"></i>
+           <span>Command Center</span>
         </div>
+        <div className="grid-body">
+          {/* Main Stats */}
+          <div className="row mb-4">
+            <div className="col-md-6 mb-3">
+              <div className="p-4 border rounded bg-light">
+                <h5 className="text-uppercase text-primary mb-3">Total Incidents</h5>
+                <h2 className="display-4 fw-bold">{stats.tickets.toLocaleString()}</h2>
+              </div>
+            </div>
+            <div className="col-md-6 mb-3">
+              <div className="p-4 border rounded bg-light">
+                <h5 className="text-uppercase text-primary mb-3">Monitored Assets</h5>
+                <h2 className="display-4 fw-bold">{stats.assets.toLocaleString()}</h2>
+              </div>
+            </div>
+          </div>
 
-        {/* Detailed Status Stats */}
-        <div className="row">
-          <div className="col-md-4 mb-3">
-            <div className="p-3 border border-warning rounded">
-              <h6 className="text-warning">OPEN</h6>
-              <h3 className="text-white">{stats.open.toLocaleString()}</h3>
+          {/* Detailed Status Stats */}
+          <div className="row">
+            <div className="col-md-4 mb-3">
+              <div className="p-3 border border-warning rounded">
+                <h6 className="text-warning">OPEN</h6>
+                <h3>{stats.open.toLocaleString()}</h3>
+              </div>
             </div>
-          </div>
-          <div className="col-md-4 mb-3">
-            <div className="p-3 border border-primary rounded">
-              <h6 className="text-primary">IN PROGRESS</h6>
-              <h3 className="text-white">{stats.in_progress.toLocaleString()}</h3>
+            <div className="col-md-4 mb-3">
+              <div className="p-3 border border-primary rounded">
+                <h6 className="text-primary">IN PROGRESS</h6>
+                <h3>{stats.in_progress.toLocaleString()}</h3>
+              </div>
             </div>
-          </div>
-          <div className="col-md-4 mb-3">
-            <div className="p-3 border border-success rounded">
-              <h6 className="text-success">RESOLVED</h6>
-              <h3 className="text-white">{stats.resolved.toLocaleString()}</h3>
+            <div className="col-md-4 mb-3">
+              <div className="p-3 border border-success rounded">
+                <h6 className="text-success">RESOLVED</h6>
+                <h3>{stats.resolved.toLocaleString()}</h3>
+              </div>
             </div>
           </div>
         </div>

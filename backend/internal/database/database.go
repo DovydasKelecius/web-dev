@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"log"
 
+	"math/rand"
+	"time"
+
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -38,6 +41,7 @@ func Seed(db *gorm.DB) {
 	}
 
 	fmt.Println("Seeding database...")
+	rand.Seed(time.Now().UnixNano())
 
 	// 1. Create Users
 	adminPass, _ := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
@@ -48,32 +52,57 @@ func Seed(db *gorm.DB) {
 	db.Create(&admin)
 	db.Create(&standardUser)
 
-	// 2. Create 100 Assets (Requirement)
+	// 2. Create 100 Assets
+	assetTypes := []string{"Server", "Workstation", "Network Device", "Database", "Firewall"}
+	criticalities := []string{"Low", "Medium", "High", "Critical"}
+	locations := []string{"Data Center A", "HQ Office", "Branch 01", "Cloud-AWS", "Cloud-Azure"}
+
 	assets := make([]models.Asset, 100)
 	for i := 0; i < 100; i++ {
 		assets[i] = models.Asset{
-			Hostname:    fmt.Sprintf("srv-%03d.mif.vu.lt", i),
-			IPAddress:   fmt.Sprintf("192.168.1.%d", i+1),
-			AssetType:   "Server",
-			Criticality: "High",
-			Owner:       "IT Dept",
-			Location:    "Data Center A",
+			Hostname:    fmt.Sprintf("node-%03d.cyberguard.internal", i),
+			IPAddress:   fmt.Sprintf("10.50.%d.%d", rand.Intn(254), rand.Intn(254)),
+			AssetType:   assetTypes[rand.Intn(len(assetTypes))],
+			Criticality: criticalities[rand.Intn(len(criticalities))],
+			Owner:       "Security Operations",
+			Location:    locations[rand.Intn(len(locations))],
 		}
 	}
 	db.Create(&assets)
 
-	// 3. Create 10,000 Tickets (Requirement)
-	// Using chunks for performance
+	// 3. Create 10,000 Tickets
+	titles := []string{
+		"Unauthorized Access Attempt",
+		"Malware Signature Detected",
+		"Brute Force Attack on SSH",
+		"Anomalous Outbound Traffic",
+		"DDoS Mitigation Active",
+		"Phishing Link Clicked",
+		"Expired SSL Certificate",
+		"Weak Cipher Suite Usage",
+		"New Admin Account Created",
+		"Database Injection Attempt",
+	}
+	descriptions := []string{
+		"Multiple failed logins detected from external IP.",
+		"Endpoint protection triggered on host.",
+		"Traffic spike detected on port 443.",
+		"Security baseline drift identified.",
+		"Integrity check failed for system binary.",
+	}
+	severities := []string{"Low", "Medium", "High", "Critical"}
+	statuses := []string{"Open", "In Progress", "Resolved", "Closed"}
+
 	for i := 0; i < 10; i++ {
 		tickets := make([]models.Ticket, 1000)
 		for j := 0; j < 1000; j++ {
 			idx := i*1000 + j
 			tickets[j] = models.Ticket{
-				Title:       fmt.Sprintf("Security Alert #%d", idx),
-				Description: "Automated scan detected vulnerability on host.",
-				Severity:    "Medium",
-				Status:      "Open",
-				AssetID:     uint((idx % 100) + 1),
+				Title:       fmt.Sprintf("%s [#%d]", titles[rand.Intn(len(titles))], idx),
+				Description: descriptions[rand.Intn(len(descriptions))],
+				Severity:    severities[rand.Intn(len(severities))],
+				Status:      statuses[rand.Intn(len(statuses))],
+				AssetID:     uint(rand.Intn(100) + 1),
 				ReporterID:  standardUser.ID,
 			}
 		}

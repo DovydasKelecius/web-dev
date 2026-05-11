@@ -30,39 +30,49 @@ const LogList: React.FC = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h2 className="cyber-title mb-4">System Security Logs</h2>
-      <div className="cyber-card">
-        <table className="table table-dark table-cyber">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Level</th>
-              <th>Source</th>
-              <th>Message</th>
-              <th>User ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={5} className="text-center">Retrieving encrypted logs...</td></tr>
-            ) : (
-              logs.map(log => (
-                <tr key={log.id}>
-                  <td className="small">{new Date(log.timestamp).toLocaleString()}</td>
-                  <td>
-                    <span className={`badge ${log.level === 'ERROR' ? 'bg-danger' : log.level === 'WARN' ? 'bg-warning text-dark' : 'bg-info text-dark'}`}>
-                      {log.level}
-                    </span>
-                  </td>
-                  <td>{log.source}</td>
-                  <td>{log.message}</td>
-                  <td>{log.user_id || 'SYSTEM'}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+    <div className="container mt-4 support-content">
+      <div className="grid">
+        <div className="grid-header">
+          <i className="fa bi-journal-text"></i>
+          <span>System Security Logs</span>
+          <div className="grid-tools">
+             <button className="btn btn-sm btn-custom" onClick={fetchLogs} disabled={loading}>
+               {loading ? 'REFRESHING...' : 'REFRESH'}
+             </button>
+          </div>
+        </div>
+        <div className="grid-body">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Level</th>
+                <th>Source</th>
+                <th>Message</th>
+                <th>User ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={5} className="text-center">Retrieving security logs...</td></tr>
+              ) : (
+                logs.map(log => (
+                  <tr key={log.id}>
+                    <td className="small">{new Date(log.timestamp).toLocaleString()}</td>
+                    <td>
+                      <span className={`badge ${log.level === 'ERROR' ? 'bg-danger' : log.level === 'WARN' ? 'bg-warning text-dark' : 'bg-info text-dark'}`}>
+                        {log.level}
+                      </span>
+                    </td>
+                    <td>{log.source}</td>
+                    <td>{log.message}</td>
+                    <td>{log.user_id || 'SYSTEM'}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

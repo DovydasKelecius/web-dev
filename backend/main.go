@@ -4,6 +4,7 @@ import (
 	"backend/internal/config"
 	"backend/internal/database"
 	"backend/internal/handlers"
+	"backend/internal/logger"
 	"backend/internal/models"
 	"encoding/json"
 	"fmt"
