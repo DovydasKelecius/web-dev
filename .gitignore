@@ -16,3 +16,4 @@ bin/
 
 # Docker
 postgres_data/
+GEMINI.md

@@ -1,19 +1,34 @@
-# Project Overview
-This project is a full-stack monorepo featuring a **Go** backend, a **React (TypeScript)** frontend, and a **PostgreSQL** database, all orchestrated with **Docker Compose**. A dedicated **Nginx** container acts as a reverse proxy, routing traffic to the appropriate services.
+# Project Overview: CyberGuard Ticketing System
+Full-stack monorepo for cybersecurity incident management.
+**Language**: English
+**Tech Stack**: Go (Backend), React (Frontend), PostgreSQL (Database), Nginx (Proxy), Bootstrap (CSS).
 
-## Architecture & Tech Stack
-- **Frontend**: React 18, Vite, TypeScript, Nginx (for serving static files).
-- **Backend**: Go 1.21, `net/http` for API, `lib/pq` for PostgreSQL connection.
-- **Database**: PostgreSQL 15.
-- **Proxy**: Nginx (External gateway).
-- **Infrastructure**: Docker with multi-stage Alpine-based builds.
+## Core Requirements (Academic)
+- **Objects**: 
+  - `Tickets` (10,000 records)
+  - `Assets` (100 records)
+- **User Management**: 
+  - Roles: `Admin`, `User`
+  - Encrypted passwords, Login/Logout.
+- **Validation**: 
+  - 8+ Backend validators (type/pattern checks).
+  - Errors mapped to frontend fields.
+- **Logging**: 
+  - 5+ action/error types stored in DB/Files.
+- **UI/UX**: 
+  - Bootstrap CSS (10+ property groups).
+  - Common header/footer pattern.
+  - Pagination for lists (>25 items).
+- **Configuration**: `base_url`, `routes`, `autoload`, `database`, `seeds`.
 
-## Networking Note
-The project uses **Host Networking** (`network_mode: host`) for all services and builds (`network: host`). This was implemented to resolve specific environment-level bridge networking issues. Services communicate via `localhost` on the following ports:
-- **Nginx Proxy**: 80 (Main entry point)
-- **Frontend**: 3000
-- **Backend**: 8080
-- **PostgreSQL**: 5432
+## Architecture
+- **Frontend**: React 18 + Vite + Bootstrap 5.
+- **Backend**: Go 1.21 + GORM (ORM) + net/http.
+- **Infrastructure**: Docker Compose (Host Networking).
+- **Ports**: Nginx: 80, Frontend: 3000, Backend: 8080, DB: 5432.
+
+## Implementation Tracking
+See [ROADMAP.md](./ROADMAP.md) for detailed task list and academic requirement compliance.
 
 ---
 

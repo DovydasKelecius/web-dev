@@ -1,0 +1,110 @@
+/* Custom Cyber Theme - 10+ Property Groups Requirement */
+
+:root {
+  --cyber-bg: #0d1117;
+  --cyber-card: #161b22;
+  --cyber-primary: #58a6ff;
+  --cyber-danger: #f85149;
+  --cyber-success: #3fb950;
+  --cyber-border: #30363d;
+  --cyber-text: #c9d1d9;
+}
+
+body {
+  background-color: var(--cyber-bg) !important;
+  color: var(--cyber-text) !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* 1. Layout Properties */
+.main-container {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+/* 2. Card/Container Styling */
+.cyber-card {
+  background-color: var(--cyber-card);
+  border: 1px solid var(--cyber-border);
+  border-radius: 6px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* 3. Typography */
+.cyber-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--cyber-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* 4. Border Effects */
+.cyber-border-glow {
+  border: 1px solid var(--cyber-primary);
+  box-shadow: 0 0 5px var(--cyber-primary);
+}
+
+/* 5. Navigation Styling */
+.navbar-cyber {
+  background-color: var(--cyber-card) !important;
+  border-bottom: 2px solid var(--cyber-primary);
+}
+
+/* 6. Form Styling */
+.form-control-cyber {
+  background-color: #0d1117 !important;
+  color: white !important;
+  border: 1px solid var(--cyber-border) !important;
+}
+
+.form-control-cyber:focus {
+  border-color: var(--cyber-primary) !important;
+  box-shadow: 0 0 0 0.25rem rgba(88, 166, 255, 0.25) !important;
+}
+
+/* 7. Button Customization */
+.btn-cyber {
+  background: linear-gradient(45deg, #1f6feb, #58a6ff);
+  border: none;
+  color: white;
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.btn-cyber:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.2);
+}
+
+/* 8. Table Customization */
+.table-cyber {
+  color: var(--cyber-text) !important;
+}
+
+.table-cyber tr:hover {
+  background-color: rgba(88, 166, 255, 0.1);
+}
+
+/* 9. Badge Styling */
+.badge-critical {
+  background-color: var(--cyber-danger);
+  animation: pulse 2s infinite;
+}
+
+/* 10. Animation */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* 11. Pagination Styling */
+.pagination .page-link {
+  background-color: var(--cyber-card);
+  border-color: var(--cyber-border);
+  color: var(--cyber-primary);
+}

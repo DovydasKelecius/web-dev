@@ -1,43 +1,45 @@
 package main
 
 import (
-	"database/sql"
+	"backend/internal/config"
+	"backend/internal/database"
+	"backend/internal/handlers"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-
-	_ "github.com/lib/pq"
 )
 
 func main() {
-	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
-		dbURL = "postgres://user:password@db:5432/dbname?sslmode=disable"
-	}
+	// Load configuration
+	cfg := config.LoadConfig()
 
-	db, err := sql.Open("postgres", dbURL)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+	// Initialize database
+	db := database.InitDB(cfg)
 
-	err = db.Ping()
-	if err != nil {
-		log.Printf("Warning: Could not connect to database: %v", err)
-	} else {
-		fmt.Println("Successfully connected to database")
-	}
+	// Auth Handlers
+	authH := &handlers.AuthHandler{DB: db}
+	assetH := &handlers.AssetHandler{DB: db}
+	ticketH := &handlers.TicketHandler{DB: db}
+
+	// Routes
+	http.HandleFunc("/api/login", authH.Login)
+
+	// Asset Routes
+	http.HandleFunc("/api/assets", assetH.List)           // GET
+	http.HandleFunc("/api/assets/create", assetH.Create) // POST
+	http.HandleFunc("/api/assets/update", assetH.Update) // PUT?id=x
+	http.HandleFunc("/api/assets/delete", assetH.Delete) // DELETE?id=x
+
+	// Ticket Routes
+	http.HandleFunc("/api/tickets", ticketH.List)           // GET?page=x
+	http.HandleFunc("/api/tickets/create", ticketH.Create) // POST
+	http.HandleFunc("/api/tickets/update", ticketH.Update) // PUT?id=x
+	http.HandleFunc("/api/tickets/delete", ticketH.Delete) // DELETE?id=x
 
 	http.HandleFunc("/api/hello", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello from the Go Backend!")
+		fmt.Fprintf(w, "CyberGuard Backend is running! BaseURL: %s", cfg.BaseURL)
 	})
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	fmt.Printf("Server starting on port %s...\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	fmt.Printf("Server starting on port %s...\n", cfg.Port)
+	log.Fatal(http.ListenAndServe(":"+cfg.Port, nil))
 }

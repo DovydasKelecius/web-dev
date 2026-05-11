@@ -1,0 +1,47 @@
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
+const Header: React.FC = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
+
+  return (
+    <nav className="navbar navbar-expand-lg navbar-dark navbar-cyber">
+      <div className="container">
+        <Link className="navbar-brand cyber-title" to="/">CyberGuard</Link>
+        <div className="collapse navbar-collapse">
+          <ul className="navbar-nav me-auto">
+            {token && (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/tickets">Tickets</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/assets">Assets</Link>
+                </li>
+              </>
+            )}
+          </ul>
+          <div className="d-flex align-items-center">
+            {token ? (
+              <>
+                <span className="text-info me-3">[{role}]</span>
+                <button className="btn btn-outline-danger btn-sm" onClick={handleLogout}>Logout</button>
+              </>
+            ) : (
+              <Link className="btn btn-cyber btn-sm" to="/login">Login</Link>
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Header;

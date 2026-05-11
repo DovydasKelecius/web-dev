@@ -1,21 +1,71 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Login from './pages/Login';
+import TicketList from './pages/TicketList';
+import AssetList from './pages/AssetList';
+import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+const Dashboard = () => (
+  <div className="container mt-5">
+    <div className="cyber-card cyber-border-glow text-center">
+      <h2 className="cyber-title mb-4">Command Center</h2>
+      <div className="row">
+        <div className="col-md-6 mb-3">
+          <div className="p-4 border border-secondary rounded">
+            <h5 className="text-uppercase text-info mb-3">Total Security Incidents</h5>
+            <h2 className="display-4 fw-bold text-white">10,000</h2>
+            <p className="text-muted small">High-volume threat database active</p>
+          </div>
+        </div>
+        <div className="col-md-6 mb-3">
+          <div className="p-4 border border-secondary rounded">
+            <h5 className="text-uppercase text-info mb-3">Monitored Network Assets</h5>
+            <h2 className="display-4 fw-bold text-white">100</h2>
+            <p className="text-muted small">Real-time infrastructure tracking</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const token = localStorage.getItem('token');
+  return token ? children : <Navigate to="/login" />;
+};
 
 function App() {
-  const [message, setMessage] = useState('Loading...')
-
-  useEffect(() => {
-    fetch('/api/hello')
-      .then(res => res.text())
-      .then(data => setMessage(data))
-      .catch(err => setMessage('Error connecting to backend'))
-  }, [])
-
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px', fontFamily: 'sans-serif' }}>
-      <h1>React + Go Monorepo</h1>
-      <p>Backend says: <strong>{message}</strong></p>
-    </div>
-  )
+    <Router>
+      <div className="main-container">
+        <Header />
+        <main className="flex-shrink-0">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/tickets" element={
+              <ProtectedRoute>
+                <TicketList />
+              </ProtectedRoute>
+            } />
+            <Route path="/assets" element={
+              <ProtectedRoute>
+                <AssetList />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
+  );
 }
 
-export default App
+export default App;
