@@ -33,6 +33,16 @@ type Ticket struct {
 	AssetID     uint           `json:"asset_id"`
 	Asset       Asset          `gorm:"foreignKey:AssetID" json:"asset"`
 	ReporterID  uint           `json:"reporter_id"`
+	Comments    []Comment      `gorm:"foreignKey:TicketID" json:"comments"`
+}
+
+type Comment struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	TicketID  uint      `json:"ticket_id"`
+	UserID    uint      `json:"user_id"`
+	User      User      `gorm:"foreignKey:UserID" json:"user"`
+	Content   string    `gorm:"type:text;not null" json:"content"`
 }
 
 // Requirement: User Management

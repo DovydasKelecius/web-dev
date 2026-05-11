@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Login from './pages/Login';
@@ -9,29 +10,37 @@ import LogList from './pages/LogList';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Dashboard = () => (
-  <div className="container mt-5">
-    <div className="cyber-card cyber-border-glow text-center">
-      <h2 className="cyber-title mb-4">Command Center</h2>
-      <div className="row">
-        <div className="col-md-6 mb-3">
-          <div className="p-4 border border-secondary rounded">
-            <h5 className="text-uppercase text-info mb-3">Total Security Incidents</h5>
-            <h2 className="display-4 fw-bold text-white">10,000</h2>
-            <p className="text-muted small">High-volume threat database active</p>
+const Dashboard = () => {
+  const [stats, setStats] = useState({ tickets: 0, assets: 0 });
+
+  useEffect(() => {
+    axios.get('/api/stats').then(res => setStats(res.data));
+  }, []);
+
+  return (
+    <div className="container mt-5">
+      <div className="cyber-card cyber-border-glow text-center">
+        <h2 className="cyber-title mb-4">Command Center</h2>
+        <div className="row">
+          <div className="col-md-6 mb-3">
+            <div className="p-4 border border-secondary rounded">
+              <h5 className="text-uppercase text-info mb-3">Total Security Incidents</h5>
+              <h2 className="display-4 fw-bold text-white">{stats.tickets.toLocaleString()}</h2>
+              <p className="text-muted small">High-volume threat database active</p>
+            </div>
           </div>
-        </div>
-        <div className="col-md-6 mb-3">
-          <div className="p-4 border border-secondary rounded">
-            <h5 className="text-uppercase text-info mb-3">Monitored Network Assets</h5>
-            <h2 className="display-4 fw-bold text-white">100</h2>
-            <p className="text-muted small">Real-time infrastructure tracking</p>
+          <div className="col-md-6 mb-3">
+            <div className="p-4 border border-secondary rounded">
+              <h5 className="text-uppercase text-info mb-3">Monitored Network Assets</h5>
+              <h2 className="display-4 fw-bold text-white">{stats.assets.toLocaleString()}</h2>
+              <p className="text-muted small">Real-time infrastructure tracking</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const token = localStorage.getItem('token');

@@ -20,6 +20,9 @@ type TicketHandler struct {
 func (h *TicketHandler) List(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	status := r.URL.Query().Get("status")
+	severity := r.URL.Query().Get("severity")
+	searchID := r.URL.Query().Get("id")
+
 	if page < 1 {
 		page = 1
 	}
@@ -32,6 +35,12 @@ func (h *TicketHandler) List(w http.ResponseWriter, r *http.Request) {
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
+	if severity != "" {
+		query = query.Where("severity = ?", severity)
+	}
+	if searchID != "" {
+		query = query.Where("id = ?", searchID)
+	}
 
 	query.Count(&total)
 
@@ -39,11 +48,16 @@ func (h *TicketHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	query.Limit(pageSize).Offset(offset).Preload("Asset").Find(&tickets)
 
+	lastPage := (total / int64(pageSize))
+	if total%int64(pageSize) != 0 || total == 0 {
+		lastPage++
+	}
+
 	response := map[string]interface{}{
 		"data":  tickets,
 		"total": total,
 		"page":  page,
-		"last":  (total / int64(pageSize)) + 1,
+		"last":  lastPage,
 	}
 	json.NewEncoder(w).Encode(response)
 }
@@ -72,18 +86,17 @@ func (h *TicketHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var input models.Ticket
+	var input map[string]interface{}
 	json.NewDecoder(r.Body).Decode(&input)
 
-	if errs := validator.ValidateTicket(input.Title, input.Severity, input.Status); errs != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(errs)
+	// Partial update using map to avoid zero-value issues with structs
+	if err := h.DB.Model(&ticket).Updates(input).Error; err != nil {
+		http.Error(w, "Update failed", http.StatusInternalServerError)
 		return
 	}
 
-	h.DB.Model(&ticket).Updates(input)
 	logger.Log(h.DB, "INFO", "TicketHandler.Update", fmt.Sprintf("Ticket updated: ID %s", id), 0)
+	h.DB.Preload("Asset").First(&ticket, id)
 	json.NewEncoder(w).Encode(ticket)
 }
 

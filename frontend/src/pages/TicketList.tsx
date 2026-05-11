@@ -22,6 +22,9 @@ const TicketList: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
+  const [severityFilter, setSeverityFilter] = useState('');
+  const [searchID, setSearchID] = useState('');
+  const [jumpPage, setJumpPage] = useState('1');
   const [loading, setLoading] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -32,15 +35,19 @@ const TicketList: React.FC = () => {
 
   useEffect(() => {
     fetchTickets();
+  }, [page, statusFilter, severityFilter, searchID]);
+
+  useEffect(() => {
     if (showCreate) fetchAssets();
-  }, [page, statusFilter, showCreate]);
+  }, [showCreate]);
 
   const fetchTickets = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`/api/tickets?page=${page}&status=${statusFilter}`);
+      const res = await axios.get(`/api/tickets?page=${page}&status=${statusFilter}&severity=${severityFilter}&id=${searchID}`);
       setTickets(res.data.data || []);
       setTotalPages(res.data.last || 1);
+      setJumpPage(String(page));
     } catch (err) {
       console.error(err);
     }
@@ -52,15 +59,36 @@ const TicketList: React.FC = () => {
     setAssets(res.data || []);
   };
 
+  const handleJumpPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const p = parseInt(jumpPage);
+    if (p >= 1 && p <= totalPages) {
+      setPage(p);
+    } else {
+      setJumpPage(String(page));
+    }
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     try {
       await axios.post('/api/tickets/create', { ...formData, asset_id: Number(formData.asset_id) });
       setShowCreate(false);
+      setPage(1);
       fetchTickets();
     } catch (err: any) {
       if (err.response?.status === 422) setErrors(err.response.data);
+    }
+  };
+
+  const handleUpdateStatus = async (id: number, newStatus: string) => {
+    try {
+      await axios.put(`/api/tickets/update?id=${id}`, { status: newStatus });
+      fetchTickets();
+      setSelectedTicket(null);
+    } catch (err) {
+      console.error("Status update failed", err);
     }
   };
 
@@ -72,22 +100,50 @@ const TicketList: React.FC = () => {
 
   return (
     <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-3">
         <h2 className="cyber-title">Security Incidents</h2>
-        <div className="d-flex">
+        <button className="btn btn-cyber" onClick={() => setShowCreate(true)}>REPORT INCIDENT</button>
+      </div>
+
+      {/* Filters Row */}
+      <div className="row mb-4 g-2">
+        <div className="col-md-3">
+          <input 
+            type="text" 
+            className="form-control form-control-cyber" 
+            placeholder="Search by ID..." 
+            value={searchID}
+            onChange={(e) => { setSearchID(e.target.value); setPage(1); }}
+          />
+        </div>
+        <div className="col-md-3">
           <select 
-            className="form-select form-control-cyber me-2" 
-            style={{width: '150px'}}
+            className="form-select form-control-cyber" 
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           >
-            <option value="">All Status</option>
+            <option value="">All Statuses</option>
             <option value="Open">Open</option>
             <option value="In Progress">In Progress</option>
             <option value="Resolved">Resolved</option>
             <option value="Closed">Closed</option>
           </select>
-          <button className="btn btn-cyber" onClick={() => setShowCreate(true)}>REPORT INCIDENT</button>
+        </div>
+        <div className="col-md-3">
+          <select 
+            className="form-select form-control-cyber" 
+            value={severityFilter}
+            onChange={(e) => { setSeverityFilter(e.target.value); setPage(1); }}
+          >
+            <option value="">All Severities</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </div>
+        <div className="col-md-3 d-flex align-items-center justify-content-end">
+           <span className="text-muted small">Showing {tickets.length} records</span>
         </div>
       </div>
 
@@ -106,6 +162,8 @@ const TicketList: React.FC = () => {
           <tbody>
             {loading ? (
               <tr><td colSpan={6} className="text-center">Loading Feed...</td></tr>
+            ) : tickets.length === 0 ? (
+              <tr><td colSpan={6} className="text-center">No records found.</td></tr>
             ) : (
               tickets.map(t => (
                 <tr key={t.id}>
@@ -130,15 +188,44 @@ const TicketList: React.FC = () => {
           </tbody>
         </table>
 
-        <nav>
-          <ul className="pagination justify-content-center">
-            <li className={`page-item ${page === 1 ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(1)}>FIRST</button></li>
-            <li className={`page-item ${page === 1 ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(p => p - 1)}>PREV</button></li>
-            <li className="page-item disabled"><span className="page-link">{page} / {totalPages}</span></li>
-            <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(p => p + 1)}>NEXT</button></li>
-            <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}><button className="page-link" onClick={() => setPage(totalPages)}>LAST</button></li>
-          </ul>
-        </nav>
+        {/* Improved Paginator */}
+        <div className="d-flex justify-content-between align-items-center mt-3">
+          <nav>
+            <ul className="pagination mb-0">
+              <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={() => setPage(1)}>« FIRST</button>
+              </li>
+              <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={() => setPage(p => p - 1)}>‹ PREV</button>
+              </li>
+              <li className="page-item disabled">
+                <span className="page-link text-white bg-dark border-secondary">
+                  PAGE {page} / {totalPages}
+                </span>
+              </li>
+              <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={() => setPage(p => p + 1)}>NEXT ›</button>
+              </li>
+              <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={() => setPage(totalPages)}>LAST »</button>
+              </li>
+            </ul>
+          </nav>
+
+          <form className="d-flex align-items-center" onSubmit={handleJumpPage}>
+            <span className="text-muted small me-2">JUMP TO:</span>
+            <input 
+              type="number" 
+              className="form-control form-control-cyber form-control-sm" 
+              style={{width: '80px'}} 
+              value={jumpPage}
+              onChange={(e) => setJumpPage(e.target.value)}
+              min="1"
+              max={totalPages}
+            />
+            <button type="submit" className="btn btn-sm btn-outline-primary ms-2">GO</button>
+          </form>
+        </div>
       </div>
 
       {/* Ticket Create Modal */}
@@ -190,7 +277,7 @@ const TicketList: React.FC = () => {
         </div>
       )}
 
-      {/* View Modal logic remains same */}
+      {/* View Modal with Status Edit for Admin */}
       {selectedTicket && (
         <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.8)'}}>
           <div className="modal-dialog modal-lg">
@@ -214,7 +301,18 @@ const TicketList: React.FC = () => {
                 </div>
                 <hr className="border-secondary" />
                 <p><strong>Full Description:</strong></p>
-                <div className="p-3 bg-dark rounded border border-secondary">{selectedTicket.description}</div>
+                <div className="p-3 bg-dark rounded border border-secondary mb-3">{selectedTicket.description}</div>
+                
+                {role === 'admin' && (
+                  <div className="border border-info p-3 rounded">
+                    <h6 className="text-info mb-2">ADMIN ACTION: UPDATE STATUS</h6>
+                    <div className="btn-group w-100">
+                      <button className="btn btn-outline-info" onClick={() => handleUpdateStatus(selectedTicket.id, 'In Progress')}>In Progress</button>
+                      <button className="btn btn-outline-success" onClick={() => handleUpdateStatus(selectedTicket.id, 'Resolved')}>Resolve</button>
+                      <button className="btn btn-outline-secondary" onClick={() => handleUpdateStatus(selectedTicket.id, 'Closed')}>Close</button>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="modal-footer border-secondary">
                 <button type="button" className="btn btn-secondary" onClick={() => setSelectedTicket(null)}>Close</button>

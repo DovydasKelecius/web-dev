@@ -4,6 +4,8 @@ import (
 	"backend/internal/config"
 	"backend/internal/database"
 	"backend/internal/handlers"
+	"backend/internal/models"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -24,6 +26,15 @@ func main() {
 
 	// Routes
 	http.HandleFunc("/api/login", authH.Login)
+	http.HandleFunc("/api/stats", func(w http.ResponseWriter, r *http.Request) {
+		var tCount, aCount int64
+		db.Model(&models.Ticket{}).Count(&tCount)
+		db.Model(&models.Asset{}).Count(&aCount)
+		json.NewEncoder(w).Encode(map[string]int64{
+			"tickets": tCount,
+			"assets":  aCount,
+		})
+	})
 
 	// Admin Routes (Should be middleware protected in full impl, but adding here)
 	http.HandleFunc("/api/logs", logH.List)
