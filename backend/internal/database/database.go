@@ -44,17 +44,17 @@ func Seed(db *gorm.DB) {
 	rand.Seed(time.Now().UnixNano())
 
 	// 1. Create Users
-	adminPass, _ := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
-	userPass, _ := bcrypt.GenerateFromPassword([]byte("user123"), bcrypt.DefaultCost)
-	devPass, _ := bcrypt.GenerateFromPassword([]byte("dev123"), bcrypt.DefaultCost)
-	auditPass, _ := bcrypt.GenerateFromPassword([]byte("audit123"), bcrypt.DefaultCost)
+	pass, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
 
 	users := []models.User{
-		{Username: "admin", PasswordHash: string(adminPass), Role: "admin"},
-		{Username: "user1", PasswordHash: string(userPass), Role: "user"},
-		{Username: "user2", PasswordHash: string(userPass), Role: "user"},
-		{Username: "dev", PasswordHash: string(devPass), Role: "user"},
-		{Username: "audit", PasswordHash: string(auditPass), Role: "admin"},
+		{Username: "admin", PasswordHash: string(pass), Role: "admin"},
+		{Username: "user1", PasswordHash: string(pass), Role: "user"},
+		{Username: "user2", PasswordHash: string(pass), Role: "user"},
+		{Username: "mgr1", PasswordHash: string(pass), Role: "admin"},
+		{Username: "mgr2", PasswordHash: string(pass), Role: "admin"},
+		{Username: "agent1", PasswordHash: string(pass), Role: "user"},
+		{Username: "agent2", PasswordHash: string(pass), Role: "user"},
+		{Username: "agent3", PasswordHash: string(pass), Role: "user"},
 	}
 	db.Create(&users)
 	standardUser := users[1]

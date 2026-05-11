@@ -33,6 +33,8 @@ type Ticket struct {
 	AssetID     uint           `json:"asset_id"`
 	Asset       Asset          `gorm:"foreignKey:AssetID" json:"asset"`
 	ReporterID  uint           `json:"reporter_id"`
+	AssignerID  uint           `json:"assigner_id"`
+	SolverID    uint           `json:"solver_id"`
 	Comments    []Comment      `gorm:"foreignKey:TicketID" json:"comments"`
 	History     []History      `gorm:"foreignKey:TicketID" json:"history"`
 }
