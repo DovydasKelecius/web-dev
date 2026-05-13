@@ -50,9 +50,9 @@ func Seed(db *gorm.DB) {
 		{Username: "admin", PasswordHash: string(pass), Role: "admin"},
 		{Username: "user1", PasswordHash: string(pass), Role: "user"},
 		{Username: "user2", PasswordHash: string(pass), Role: "user"},
-		{Username: "agent1", PasswordHash: string(pass), Role: "user"},
-		{Username: "agent2", PasswordHash: string(pass), Role: "user"},
-		{Username: "agent3", PasswordHash: string(pass), Role: "user"},
+		{Username: "agent1", PasswordHash: string(pass), Role: "agent"},
+		{Username: "agent2", PasswordHash: string(pass), Role: "agent"},
+		{Username: "agent3", PasswordHash: string(pass), Role: "agent"},
 	}
 	db.Create(&users)
 	standardUser := users[1]

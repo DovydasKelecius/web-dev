@@ -46,7 +46,7 @@ func (h *TicketHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	offset := (page - 1) * pageSize
 
-	query.Limit(pageSize).Offset(offset).Preload("Asset").Preload("Comments").Preload("Comments.User").Preload("History").Preload("History.User").Find(&tickets)
+	query.Limit(pageSize).Offset(offset).Order("id desc").Preload("Asset").Preload("Comments").Preload("Comments.User").Preload("History").Preload("History.User").Find(&tickets)
 
 	lastPage := int(total / int64(pageSize))
 	if total%int64(pageSize) != 0 || total == 0 {
@@ -91,7 +91,19 @@ func (h *TicketHandler) Update(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&input)
 
 	// Partial update using map to avoid zero-value issues with structs
-	if err := h.DB.Model(&ticket).Updates(input).Error; err != nil {
+	actingUserID := uint(0)
+	if uid, ok := input["acting_user_id"].(float64); ok {
+		actingUserID = uint(uid)
+	}
+	// Clean input before DB update
+	updateData := make(map[string]interface{})
+	for k, v := range input {
+		if k != "acting_user_id" {
+			updateData[k] = v
+		}
+	}
+
+	if err := h.DB.Model(&ticket).Updates(updateData).Error; err != nil {
 		http.Error(w, "Update failed", http.StatusInternalServerError)
 		return
 	}
@@ -101,24 +113,24 @@ func (h *TicketHandler) Update(w http.ResponseWriter, r *http.Request) {
 		h.DB.Create(&models.History{
 			TicketID: ticket.ID,
 			Action:   fmt.Sprintf("Status changed to %s", status),
-			UserID:   1,
+			UserID:   actingUserID,
 		})
 		// Requirement: When in progress, show as comment
 		if status == "In Progress" {
 			h.DB.Create(&models.Comment{
 				TicketID: ticket.ID,
-				UserID:   1, // System
+				UserID:   actingUserID,
 				Content:  "System: Investigation started. Ticket moved to In Progress.",
 			})
 		}
 	}
 
-	// Record History if assigned
-	if solverID, ok := input["solver_id"].(float64); ok {
+	// Record History if severity changed
+	if sev, ok := input["severity"].(string); ok {
 		h.DB.Create(&models.History{
 			TicketID: ticket.ID,
-			Action:   fmt.Sprintf("Assigned to Agent %v", solverID),
-			UserID:   1, // Should get from context
+			Action:   fmt.Sprintf("Severity changed to %s", sev),
+			UserID:   actingUserID,
 		})
 	}
 

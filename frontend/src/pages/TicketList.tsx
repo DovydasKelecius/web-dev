@@ -112,7 +112,7 @@ const TicketList: React.FC = () => {
 
   const handleUpdate = async (id: number, payload: any) => {
     try {
-      await axios.put(`/api/tickets/update?id=${id}`, payload);
+      await axios.put(`/api/tickets/update?id=${id}`, { ...payload, acting_user_id: Number(userId) });
       fetchTickets();
     } catch (err) {
       console.error("Update failed", err);
@@ -346,17 +346,17 @@ const TicketList: React.FC = () => {
                            <div className="col-md-6">
                               <label className="small text-muted d-block mb-1">SET STATUS</label>
                               <div className="btn-group w-100">
-                                <button className="btn btn-sm btn-outline-info" onClick={() => handleUpdate(selectedTicket.id, { status: 'In Progress' })}>In Progress</button>
-                                <button className="btn btn-sm btn-outline-success" onClick={() => handleUpdate(selectedTicket.id, { status: 'Resolved' })}>Resolve</button>
+                                <button className="btn btn-sm btn-outline-info" onClick={() => handleUpdate(selectedTicket.id, { status: 'In Progress', acting_user_id: Number(userId) })}>In Progress</button>
+                                <button className="btn btn-sm btn-outline-success" onClick={() => handleUpdate(selectedTicket.id, { status: 'Resolved', acting_user_id: Number(userId) })}>Resolve</button>
                               </div>
                            </div>
                            <div className="col-md-6">
                               <label className="small text-muted d-block mb-1">SET SEVERITY</label>
                               <div className="btn-group w-100">
-                                <button className="btn btn-sm btn-outline-warning" onClick={() => handleUpdate(selectedTicket.id, { severity: 'Low' })}>Low</button>
-                                <button className="btn btn-sm btn-outline-warning" onClick={() => handleUpdate(selectedTicket.id, { severity: 'Medium' })}>Med</button>
-                                <button className="btn btn-sm btn-outline-danger" onClick={() => handleUpdate(selectedTicket.id, { severity: 'High' })}>High</button>
-                                <button className="btn btn-sm btn-danger" onClick={() => handleUpdate(selectedTicket.id, { severity: 'Critical' })}>Crit</button>
+                                <button className="btn btn-sm btn-outline-warning" onClick={() => handleUpdate(selectedTicket.id, { severity: 'Low', acting_user_id: Number(userId) })}>Low</button>
+                                <button className="btn btn-sm btn-outline-warning" onClick={() => handleUpdate(selectedTicket.id, { severity: 'Medium', acting_user_id: Number(userId) })}>Med</button>
+                                <button className="btn btn-sm btn-outline-danger" onClick={() => handleUpdate(selectedTicket.id, { severity: 'High', acting_user_id: Number(userId) })}>High</button>
+                                <button className="btn btn-sm btn-danger" onClick={() => handleUpdate(selectedTicket.id, { severity: 'Critical', acting_user_id: Number(userId) })}>Crit</button>
                               </div>
                            </div>
                         </div>
