@@ -141,6 +141,11 @@ const TicketList: React.FC = () => {
     fetchTickets();
   };
 
+  const openCreateModal = () => {
+    fetchAssets();
+    setShowCreate(true);
+  };
+
   const getSeverityBadge = (sev: string) => {
     switch (sev) {
       case 'Critical': return 'badge bg-danger';
@@ -160,7 +165,7 @@ const TicketList: React.FC = () => {
             <span className="h5 mb-0">Security Incidents</span>
           </div>
           <div className="grid-tools">
-            <button className="btn btn-custom btn-sm" onClick={() => setShowCreate(true)}>REPORT INCIDENT</button>
+            <button className="btn btn-custom btn-sm" onClick={openCreateModal}>REPORT INCIDENT</button>
           </div>
 
         </div>

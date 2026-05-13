@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -77,21 +76,6 @@ func (h *AssetHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if errs := validator.ValidateAsset(input.Hostname, input.IPAddress, input.AssetType, input.Criticality); errs != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		json.NewEncoder(w).Encode(errs)
-		return
-	}
-
-	h.DB.Model(&asset).Updates(input)
-	json.NewEncoder(w).Encode(asset)
-}
-
-func (h *AssetHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
-	h.DB.Delete(&models.Asset{}, id)
-	logger.Log(h.DB, "WARN", "AssetHandler.Delete", fmt.Sprintf("Asset deleted: ID %s", id), 0)
-	w.WriteHeader(http.StatusNoContent)
-}
-StatusUnprocessableEntity)
 		json.NewEncoder(w).Encode(errs)
 		return
 	}
