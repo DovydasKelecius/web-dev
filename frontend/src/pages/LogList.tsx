@@ -33,8 +33,10 @@ const LogList: React.FC = () => {
     <div className="container mt-4 support-content">
       <div className="grid">
         <div className="grid-header">
-          <i className="fa bi-journal-text"></i>
-          <span>System Security Logs</span>
+          <div className="d-flex align-items-center">
+            <i className="bi bi-journal-text me-2" style={{fontSize: '1.5em'}}></i>
+            <span className="h5 mb-0">System Security Logs</span>
+          </div>
           <div className="grid-tools">
              <button className="btn btn-sm btn-custom" onClick={fetchLogs} disabled={loading}>
                {loading ? 'REFRESHING...' : 'REFRESH'}
@@ -55,6 +57,8 @@ const LogList: React.FC = () => {
             <tbody>
               {loading ? (
                 <tr><td colSpan={5} className="text-center">Retrieving security logs...</td></tr>
+              ) : (!Array.isArray(logs) || logs.length === 0) ? (
+                <tr><td colSpan={5} className="text-center">No logs found.</td></tr>
               ) : (
                 logs.map(log => (
                   <tr key={log.id}>

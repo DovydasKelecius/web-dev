@@ -13,7 +13,8 @@ type LogHandler struct {
 }
 
 func (h *LogHandler) List(w http.ResponseWriter, r *http.Request) {
-	var logs []models.LogEntry
+	logs := []models.LogEntry{}
 	h.DB.Order("timestamp desc").Limit(100).Find(&logs)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(logs)
 }

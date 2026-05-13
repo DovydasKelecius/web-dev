@@ -28,7 +28,7 @@ func (h *TicketHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	pageSize := 25
 
-	var tickets []models.Ticket
+	tickets := []models.Ticket{}
 	var total int64
 	query := h.DB.Model(&models.Ticket{})
 
@@ -59,6 +59,7 @@ func (h *TicketHandler) List(w http.ResponseWriter, r *http.Request) {
 		"page":  page,
 		"last":  lastPage,
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 

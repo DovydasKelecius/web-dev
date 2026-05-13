@@ -50,8 +50,6 @@ func Seed(db *gorm.DB) {
 		{Username: "admin", PasswordHash: string(pass), Role: "admin"},
 		{Username: "user1", PasswordHash: string(pass), Role: "user"},
 		{Username: "user2", PasswordHash: string(pass), Role: "user"},
-		{Username: "mgr1", PasswordHash: string(pass), Role: "admin"},
-		{Username: "mgr2", PasswordHash: string(pass), Role: "admin"},
 		{Username: "agent1", PasswordHash: string(pass), Role: "user"},
 		{Username: "agent2", PasswordHash: string(pass), Role: "user"},
 		{Username: "agent3", PasswordHash: string(pass), Role: "user"},
@@ -105,7 +103,7 @@ func Seed(db *gorm.DB) {
 		for j := 0; j < 1000; j++ {
 			idx := i*1000 + j
 			tickets[j] = models.Ticket{
-				Title:       fmt.Sprintf("%s [#%d]", titles[rand.Intn(len(titles))], idx),
+				Title:       fmt.Sprintf("%s [#%d]", titles[rand.Intn(len(titles))], idx+1),
 				Description: descriptions[rand.Intn(len(descriptions))],
 				Severity:    severities[rand.Intn(len(severities))],
 				Status:      statuses[rand.Intn(len(statuses))],

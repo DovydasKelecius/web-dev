@@ -28,6 +28,7 @@ const AssetList: React.FC = () => {
     setAssets(res.data || []);
   };
 
+
   const handleOpenCreate = () => {
     setEditingAsset(null);
     setFormData({ hostname: '', ip_address: '', asset_type: 'Server', criticality: 'Low', owner: 'Admin' });
@@ -70,14 +71,17 @@ const AssetList: React.FC = () => {
     <div className="container mt-4 support-content">
       <div className="grid">
         <div className="grid-header">
-          <i className="fa bi-pc-display"></i>
-          <span>Network Assets</span>
+          <div className="d-flex align-items-center">
+            <i className="bi bi-pc-display me-2" style={{fontSize: '1.5em'}}></i>
+            <span className="h5 mb-0">Network Assets</span>
+          </div>
           <div className="grid-tools">
             {role === 'admin' && (
               <button className="btn btn-custom btn-sm" onClick={handleOpenCreate}>
                 REGISTER NEW ASSET
               </button>
             )}
+
           </div>
         </div>
         <div className="grid-body">
@@ -105,7 +109,7 @@ const AssetList: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {assets.map(a => (
+              {Array.isArray(assets) && assets.map(a => (
                 <tr key={a.id}>
                   <td>{a.id}</td>
                   <td>{a.hostname}</td>

@@ -56,7 +56,7 @@ const TicketList: React.FC = () => {
   }, [page, statusFilter, severityFilter, searchID]);
 
   useEffect(() => {
-    if (showCreate) fetchAssets();
+    fetchAssets();
   }, [showCreate]);
 
   const fetchTickets = async () => {
@@ -78,8 +78,13 @@ const TicketList: React.FC = () => {
   };
 
   const fetchAssets = async () => {
-    const res = await axios.get('/api/assets');
-    setAssets(res.data || []);
+    try {
+      const res = await axios.get('/api/assets?all=true');
+      console.log("Assets received:", res.data);
+      setAssets(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Failed to fetch assets:", err);
+    }
   };
 
   const handleJumpPage = (e: React.FormEvent) => {
@@ -150,11 +155,14 @@ const TicketList: React.FC = () => {
     <div className="container support-content">
       <div className="grid">
         <div className="grid-header">
-          <i className="fa bi-ticket-detailed"></i>
-          <span>Security Incidents</span>
+          <div className="d-flex align-items-center">
+            <i className="bi bi-ticket-detailed me-2" style={{fontSize: '1.5em'}}></i>
+            <span className="h5 mb-0">Security Incidents</span>
+          </div>
           <div className="grid-tools">
             <button className="btn btn-custom btn-sm" onClick={() => setShowCreate(true)}>REPORT INCIDENT</button>
           </div>
+
         </div>
         <div className="grid-body">
           <div className="row mb-4 g-2">
@@ -184,7 +192,7 @@ const TicketList: React.FC = () => {
           <div className="ticket-list-group">
             {loading ? (
               <div className="text-center p-5">Loading Feed...</div>
-            ) : tickets.length === 0 ? (
+            ) : (!Array.isArray(tickets) || tickets.length === 0) ? (
               <div className="text-center p-5">No records found.</div>
             ) : (
               <ul className="list-group fa-padding">
@@ -251,7 +259,7 @@ const TicketList: React.FC = () => {
                       <label className="form-label small">Affected Asset</label>
                       <select className="form-select" value={formData.asset_id} onChange={e => setFormData({...formData, asset_id: Number(e.target.value)})} required>
                         <option value="">Select Asset...</option>
-                        {assets.map(a => <option key={a.id} value={a.id}>{a.hostname}</option>)}
+                        {Array.isArray(assets) && assets.map(a => <option key={a.id} value={a.id}>{a.hostname}</option>)}
                       </select>
                     </div>
                     <div className="col-md-6 mb-3">
@@ -304,7 +312,7 @@ const TicketList: React.FC = () => {
                     
                     <h6>Discussion Feed</h6>
                     <div className="mb-4" style={{maxHeight: '300px', overflowY: 'auto'}}>
-                      {selectedTicket.comments?.length > 0 ? (
+                      {Array.isArray(selectedTicket.comments) && selectedTicket.comments.length > 0 ? (
                         selectedTicket.comments.map(c => (
                           <div key={c.id} className="mb-2 p-2 border-start border-primary bg-light rounded">
                             <div className="d-flex justify-content-between small text-muted mb-1">
@@ -326,9 +334,9 @@ const TicketList: React.FC = () => {
                       </div>
                     </form>
 
-                    {role === 'admin' && (
+                    {(role === 'admin' || role === 'agent') && (
                       <div className="border border-info p-3 rounded mt-2 bg-light">
-                        <h6 className="text-info mb-3">ADMIN OVERRIDE CONTROLS</h6>
+                        <h6 className="text-info mb-3">TICKET MANAGEMENT CONTROLS</h6>
                         <div className="row g-2 mb-3">
                            <div className="col-md-6">
                               <label className="small text-muted d-block mb-1">SET STATUS</label>
@@ -354,7 +362,7 @@ const TicketList: React.FC = () => {
                   <div className="col-lg-4">
                     <h6 className="mb-3 text-center">Audit Trail</h6>
                     <div className="small" style={{maxHeight: '600px', overflowY: 'auto'}}>
-                      {selectedTicket.history?.length > 0 ? (
+                      {Array.isArray(selectedTicket.history) && selectedTicket.history.length > 0 ? (
                         selectedTicket.history.slice().reverse().map(h => (
                           <div key={h.id} className="mb-2 p-2 border rounded bg-light" style={{fontSize: '0.8rem'}}>
                             <div className="text-info mb-1">{h.action}</div>

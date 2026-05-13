@@ -36,7 +36,7 @@ const Header: React.FC = () => {
           <div className="d-flex align-items-center">
             {token ? (
               <>
-                <span className="text-primary fw-bold me-3">[{role?.toUpperCase() || 'USER'}]</span>
+                <span className="text-primary fw-bold me-3">[{role?.toUpperCase() || 'UNKNOWN'}]</span>
                 <button className="btn btn-outline-danger btn-sm" onClick={handleLogout}>Logout</button>
               </>
             ) : (
